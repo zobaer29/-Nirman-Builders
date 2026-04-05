@@ -1,0 +1,568 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Nirman Builders - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-high": "#b2f1c7",
+              outline: "#548064",
+              "primary-fixed": "#5cfd80",
+              "tertiary-container": "#00e3fe",
+              "on-primary": "#cfffce",
+              "on-secondary-fixed-variant": "#00653c",
+              "tertiary-fixed-dim": "#00d4ed",
+              "surface-variant": "#a8ecbf",
+              "on-secondary-fixed": "#004528",
+              "on-surface-variant": "#39644a",
+              "surface-container": "#bbf6ce",
+              "on-primary-fixed": "#004819",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#006827",
+              "on-tertiary-fixed-variant": "#005762",
+              "primary-container": "#5cfd80",
+              "tertiary-dim": "#005863",
+              "on-error-container": "#520c00",
+              tertiary: "#006572",
+              "error-container": "#f95630",
+              "on-tertiary": "#d9f8ff",
+              "inverse-primary": "#5cfd80",
+              "secondary-fixed": "#78f5ae",
+              "on-primary-container": "#005d22",
+              "on-surface": "#06361f",
+              "outline-variant": "#89b898",
+              "on-error": "#ffefec",
+              "on-secondary": "#cbffda",
+              background: "#dcffe5",
+              "on-background": "#06361f",
+              surface: "#dcffe5",
+              "primary-dim": "#005d22",
+              "tertiary-fixed": "#00e3fe",
+              "secondary-container": "#78f5ae",
+              primary: "#006a28",
+              "primary-fixed-dim": "#4bee74",
+              "surface-dim": "#9ce4b6",
+              "secondary-dim": "#005c36",
+              "on-secondary-container": "#005a35",
+              "inverse-on-surface": "#79a789",
+              error: "#b02500",
+              "secondary-fixed-dim": "#69e6a1",
+              secondary: "#00693f",
+              "on-tertiary-fixed": "#003840",
+              "error-dim": "#b92902",
+              "surface-bright": "#dcffe5",
+              "inverse-surface": "#001207",
+              "surface-container-highest": "#a8ecbf",
+              "on-tertiary-container": "#004d57",
+              "surface-tint": "#006a28",
+              "surface-container-low": "#c7fdd8",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            fontFamily: {
+              headline: ["Manrope"],
+              body: ["Inter"],
+              label: ["Inter"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        vertical-align: middle;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      .headline {
+        font-family: "Manrope", sans-serif;
+      }
+      .glass-effect {
+        backdrop-filter: blur(12px);
+        background: rgba(215, 216, 215, 0.7);
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-surface min-h-screen">
+    <!-- SideNavBar Shell -->
+    <aside
+      class="fixed left-0 top-0 h-full w-64 bg-[#c7fdd8] dark:bg-emerald-950 flex flex-col shadow-[32px_0_32px_rgba(6,54,31,0.04)] z-50"
+    >
+      <div class="px-8 py-8">
+        <h1
+          class="text-lg font-bold tracking-tight text-[#06361f] dark:text-[#dcffe5] mb-1"
+        >
+          Nirman Builders
+        </h1>
+        <p class="text-[0.75rem] font-medium text-outline">
+          Editorial Dashboard
+        </p>
+      </div>
+      <nav class="flex-1 space-y-1 mt-4">
+        <!-- Dashboard Active -->
+        <a
+          class="bg-[#ffffff] dark:bg-emerald-800 text-[#006a28] dark:text-[#dcffe5] font-bold rounded-l-full ml-4 pl-4 py-3 flex items-center gap-3 transition-all"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >dashboard</span
+          >
+          <span class="text-[0.75rem]">Dashboard</span>
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center gap-3"
+          href="#"
+        >
+          <span class="material-symbols-outlined">architecture</span>
+          <span class="text-[0.75rem]">Projects</span>
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center justify-between group"
+          href="#"
+        >
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined">list_alt</span>
+            <span class="text-[0.75rem]">Requests</span>
+          </div>
+          <span
+            class="bg-error text-on-error text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+            >4</span
+          >
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center gap-3"
+          href="#"
+        >
+          <span class="material-symbols-outlined">engineering</span>
+          <span class="text-[0.75rem]">Contractors</span>
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center gap-3"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="text-[0.75rem]">Workers</span>
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center gap-3"
+          href="#"
+        >
+          <span class="material-symbols-outlined">analytics</span>
+          <span class="text-[0.75rem]">Reports</span>
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center gap-3"
+          href="#"
+        >
+          <span class="material-symbols-outlined">forum</span>
+          <span class="text-[0.75rem]">Chat</span>
+        </a>
+        <a
+          class="text-[#06361f] dark:text-[#89b898] hover:bg-[#a8ecbf]/50 dark:hover:bg-emerald-900 transition-colors px-8 py-3 flex items-center gap-3"
+          href="#"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="text-[0.75rem]">Settings</span>
+        </a>
+      </nav>
+      <div class="p-8">
+        <button
+          class="w-full bg-primary text-on-primary py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[0.98] active:opacity-80 transition-all"
+        >
+          <span class="material-symbols-outlined">add</span>
+          <span>New Project</span>
+        </button>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="pl-64 min-h-screen">
+      <!-- TopNavBar Shell -->
+      <header
+        class="sticky top-0 z-40 bg-[#dcffe5]/70 backdrop-blur-xl flex justify-between items-center w-full px-8 py-6"
+      >
+        <h2 class="text-2xl font-extrabold headline text-primary">
+          Admin Dashboard
+        </h2>
+        <div class="flex items-center gap-6">
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-3 text-outline"
+              >search</span
+            >
+            <input
+              class="bg-surface-container border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary w-64"
+              placeholder="Search projects..."
+              type="text"
+            />
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              class="p-2 text-on-surface hover:bg-surface-variant rounded-full transition-all"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button
+              class="p-2 text-on-surface hover:bg-surface-variant rounded-full transition-all"
+            >
+              <span class="material-symbols-outlined">help</span>
+            </button>
+            <div
+              class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed"
+            >
+              <img
+                alt="Admin Avatar"
+                class="w-full h-full object-cover"
+                data-alt="Close up professional portrait of a confident middle-aged architect wearing stylish glasses in a modern studio setting"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6xDQ0nCkTlSbvrso2wvM2b2qfW67Q3y8V3_-Dng9Og92RK9PXCco3Ih0eatdJKHI4NsAPGZsD-mqx2cF04pt6otGxvJEH_G-wDjty4YOR-08hug0lOysyRS1-TedWpXAswl-GS2fVREVEeu3A0p6oDcjvcOux200-kpBtyiDA-CsGl8c9sCm3GoDC5njsnyxyelCHyawh02h8Xv6fotJPSCaI_kVZJgwXd8CLPH3zD4WQ66um6ng0VBTsBc88aQn7t82aCKVOGVA"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="p-8">
+        <!-- Summary KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div
+            class="bg-surface-container-lowest p-6 rounded-xl shadow-[32px_0_32px_rgba(6,54,31,0.04)]"
+          >
+            <p class="text-label-md text-on-surface-variant font-medium mb-1">
+              Total Projects
+            </p>
+            <div class="flex items-end justify-between">
+              <h3 class="text-4xl font-extrabold headline text-primary">24</h3>
+              <span
+                class="bg-primary-container text-on-primary-container text-[10px] px-2 py-1 rounded-full font-bold"
+                >+12%</span
+              >
+            </div>
+          </div>
+          <div
+            class="bg-surface-container-lowest p-6 rounded-xl shadow-[32px_0_32px_rgba(6,54,31,0.04)]"
+          >
+            <p class="text-label-md text-on-surface-variant font-medium mb-1">
+              Ongoing
+            </p>
+            <h3 class="text-4xl font-extrabold headline text-primary">12</h3>
+          </div>
+          <div
+            class="bg-surface-container-lowest p-6 rounded-xl shadow-[32px_0_32px_rgba(6,54,31,0.04)]"
+          >
+            <p class="text-label-md text-on-surface-variant font-medium mb-1">
+              Completed
+            </p>
+            <h3 class="text-4xl font-extrabold headline text-primary">08</h3>
+          </div>
+          <div
+            class="bg-surface-container-lowest p-6 rounded-xl shadow-[32px_0_32px_rgba(6,54,31,0.04)]"
+          >
+            <p class="text-label-md text-on-surface-variant font-medium mb-1">
+              Pending Requests
+            </p>
+            <h3 class="text-4xl font-extrabold headline text-error">04</h3>
+          </div>
+        </div>
+        <!-- Dashboard Body -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Main Table Section -->
+          <div class="lg:col-span-2 space-y-6">
+            <div class="bg-surface-container-low p-1 rounded-2xl">
+              <div
+                class="bg-surface-container-lowest rounded-xl overflow-hidden"
+              >
+                <div
+                  class="px-6 py-5 flex justify-between items-center bg-surface-container-low/30"
+                >
+                  <h3 class="text-lg font-bold headline">
+                    Recent Project Requests
+                  </h3>
+                  <button
+                    class="text-primary text-sm font-semibold hover:underline"
+                  >
+                    View All
+                  </button>
+                </div>
+                <table class="w-full text-left">
+                  <thead class="bg-surface-container-low/20">
+                    <tr>
+                      <th
+                        class="px-6 py-4 text-[0.75rem] font-semibold text-outline tracking-wider"
+                      >
+                        Client Details
+                      </th>
+                      <th
+                        class="px-6 py-4 text-[0.75rem] font-semibold text-outline tracking-wider"
+                      >
+                        Type &amp; Budget
+                      </th>
+                      <th
+                        class="px-6 py-4 text-[0.75rem] font-semibold text-outline tracking-wider"
+                      >
+                        Status
+                      </th>
+                      <th
+                        class="px-6 py-4 text-[0.75rem] font-semibold text-outline tracking-wider"
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-outline-variant/10">
+                    <tr class="hover:bg-surface-bright transition-colors">
+                      <td class="px-6 py-5">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-xs"
+                          >
+                            AS
+                          </div>
+                          <div>
+                            <p class="text-sm font-bold">Ahmed Sharif</p>
+                            <p class="text-xs text-outline">
+                              Dhaka, Bangladesh
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-5">
+                        <p class="text-sm font-semibold">Residential Villa</p>
+                        <p class="text-xs text-primary font-bold">
+                          ৳1.2M - ৳1.5M
+                        </p>
+                      </td>
+                      <td class="px-6 py-5">
+                        <span
+                          class="bg-secondary-container text-on-secondary-container text-[10px] px-2.5 py-1 rounded-full font-bold"
+                          >Pending Review</span
+                        >
+                      </td>
+                      <td class="px-6 py-5">
+                        <button class="text-primary hover:text-primary-dim p-1">
+                          <span class="material-symbols-outlined"
+                            >visibility</span
+                          >
+                        </button>
+                        <button
+                          class="text-outline hover:text-on-surface p-1 ml-2"
+                        >
+                          <span class="material-symbols-outlined"
+                            >more_vert</span
+                          >
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-surface-bright transition-colors">
+                      <td class="px-6 py-5">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface font-bold text-xs"
+                          >
+                            NL
+                          </div>
+                          <div>
+                            <p class="text-sm font-bold">Nabil Latif</p>
+                            <p class="text-xs text-outline">Chittagong</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-5">
+                        <p class="text-sm font-semibold">Duplex Renovation</p>
+                        <p class="text-xs text-primary font-bold">
+                          ৳450K - ৳600K
+                        </p>
+                      </td>
+                      <td class="px-6 py-5">
+                        <span
+                          class="bg-tertiary-container text-on-tertiary-container text-[10px] px-2.5 py-1 rounded-full font-bold"
+                          >Estimating</span
+                        >
+                      </td>
+                      <td class="px-6 py-5">
+                        <button class="text-primary hover:text-primary-dim p-1">
+                          <span class="material-symbols-outlined"
+                            >visibility</span
+                          >
+                        </button>
+                        <button
+                          class="text-outline hover:text-on-surface p-1 ml-2"
+                        >
+                          <span class="material-symbols-outlined"
+                            >more_vert</span
+                          >
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Right Sidebar Widgets -->
+          <div class="space-y-8">
+            <!-- Project Milestones Widget -->
+            <div class="bg-surface-container-low p-6 rounded-2xl">
+              <h3
+                class="text-lg font-bold headline mb-6 flex items-center gap-2"
+              >
+                <span class="material-symbols-outlined text-primary"
+                  >leaderboard</span
+                >
+                Project Milestones
+              </h3>
+              <div class="space-y-6">
+                <div>
+                  <div class="flex justify-between text-sm font-bold mb-2">
+                    <span>Skyline Tower</span>
+                    <span class="text-primary">75%</span>
+                  </div>
+                  <div class="w-full h-2 bg-outline-variant rounded-full">
+                    <div
+                      class="h-full bg-primary rounded-full"
+                      style="width: 75%"
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm font-bold mb-2">
+                    <span>Green Valley Villa</span>
+                    <span class="text-primary">42%</span>
+                  </div>
+                  <div class="w-full h-2 bg-outline-variant rounded-full">
+                    <div
+                      class="h-full bg-primary rounded-full"
+                      style="width: 42%"
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm font-bold mb-2">
+                    <span>City Mall Renovation</span>
+                    <span class="text-primary">90%</span>
+                  </div>
+                  <div class="w-full h-2 bg-outline-variant rounded-full">
+                    <div
+                      class="h-full bg-primary rounded-full"
+                      style="width: 90%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Available Contractors Widget -->
+            <div
+              class="bg-surface-container-lowest p-6 rounded-2xl shadow-[32px_0_32px_rgba(6,54,31,0.04)]"
+            >
+              <h3 class="text-lg font-bold headline mb-6">
+                Available Contractors
+              </h3>
+              <div class="space-y-4">
+                <div
+                  class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low/40"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center"
+                    >
+                      <span class="material-symbols-outlined text-primary"
+                        >electric_bolt</span
+                      >
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold">Jamal Electricals</p>
+                      <p class="text-[10px] text-outline font-semibold">
+                        ID: #44901
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded-full"
+                    >Ready</span
+                  >
+                </div>
+                <div
+                  class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low/40"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 bg-surface-container-high rounded-full flex items-center justify-center"
+                    >
+                      <span class="material-symbols-outlined text-outline"
+                        >foundation</span
+                      >
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold">M/S Haque Builders</p>
+                      <p class="text-[10px] text-outline font-semibold">
+                        ID: #22812
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    class="bg-error/10 text-error text-[10px] font-bold px-2 py-1 rounded-full"
+                    >Busy</span
+                  >
+                </div>
+                <div
+                  class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low/40"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 bg-tertiary-container rounded-full flex items-center justify-center"
+                    >
+                      <span class="material-symbols-outlined text-tertiary"
+                        >plumbing</span
+                      >
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold">Rana Plumbing</p>
+                      <p class="text-[10px] text-outline font-semibold">
+                        ID: #91032
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded-full"
+                    >Ready</span
+                  >
+                </div>
+              </div>
+              <button
+                class="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-outline text-sm font-bold hover:bg-surface-container-low transition-all"
+              >
+                View All Directory
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
