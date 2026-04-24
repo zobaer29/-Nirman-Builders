@@ -1,0 +1,75 @@
+How to Connect MySQL to this Next.js Project
+
+Since this is a Next.js project, you will need a MySQL driver to communicate with your database from the server-side code. The widely recommended library for raw queries is `mysql2`.
+
+Step 1: Install the `mysql2` package
+Open your terminal in your project directory (`d:\web course`) and run:
+--------------------------------------------------
+npm install mysql2
+--------------------------------------------------
+
+Step 2: Create a configuration file
+Create a new file named `db.js` inside your `src` folder (e.g., `src/lib/db.js`). This file will set up a connection pool that you can reuse across your application.
+
+```javascript
+// src/lib/db.js
+import mysql from 'mysql2/promise';
+
+// Create the connection pool. The pool-specific settings are the defaults.
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+export default pool;
+```
+
+Step 3: Setup Environment Variables
+It is best practice not to hardcode your database credentials. Create a file named `.env.local` in the root of your project (`d:\web course\.env.local`):
+
+```env
+# .env.local
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=your_database_name
+```
+
+Step 4: Use the Database in Next.js Server Actions or API Routes
+Now you can import the `pool` into any Next.js server-side code (like an API route, React Server Component, or Server Action) to query your database.
+
+Example of an API Route (`src/app/api/users/route.js`):
+```javascript
+import pool from '@/lib/db';
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  try {
+    // Get a connection from the pool and execute a query
+    const [rows, fields] = await pool.query('SELECT username, email FROM users');
+    return NextResponse.json({ users: rows }, { status: 200 });
+  } catch (error) {
+    console.error('Database query failed:', error);
+    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+  }
+}
+```
+Example using Next.js Server Action (`src/app/actions.js`):
+```javascript
+'use server'
+
+import pool from '@/lib/db';
+
+export async function registerUser(formData) {
+  const email = formData.get('email');
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+  // Perform your logic...
+}
+```

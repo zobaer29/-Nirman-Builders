@@ -10,10 +10,10 @@ export default function AdminLayout({ children }) {
     { href: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true },
     { href: '/admin/projects', icon: 'architecture', label: 'Projects' },
     { href: '/admin/requests', icon: 'list_alt', label: 'Requests' },
-    { href: '#', icon: 'engineering', label: 'Contractors' },
-    { href: '#', icon: 'groups', label: 'Workers' },
+    { href: '/admin/contractor', icon: 'engineering', label: 'Contractors' },
+    { href: '/admin/worker', icon: 'groups', label: 'Workers' },
     { href: '/admin/chat', icon: 'chat', label: 'Chat' },
-    { href: '#', icon: 'analytics', label: 'Reports' },
+    { href: '/admin/report', icon: 'analytics', label: 'Reports' },
   ];
   return (
     <div className="bg-surface text-on-background min-h-screen flex overflow-hidden font-body">
