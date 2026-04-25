@@ -6,14 +6,20 @@ const ReportPage = () => {
       {/* Page Header & Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-emerald-600 to-teal-500 rounded-full"></div>
-            <h1 className="text-3xl md:text-4xl font-bold font-headline bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">
-              Executive Performance Overview
-            </h1>
-          </div>
-          <p className="text-slate-500 mt-1 ml-3">Real-time operational and financial insights across all active job sites.</p>
-        </div>
+  <div className="flex items-center gap-3 mb-2">
+    <div className="h-10 w-[4px] rounded-full bg-gradient-to-b from-blue-600 via-emerald-400 to-green-400"></div>
+
+    <h1 className="text-3xl md:text-4xl font-bold font-headline leading-tight 
+      bg-gradient-to-r from-blue-600 via-emerald-400 to-green-400 
+      bg-clip-text text-transparent tracking-tight">
+      Executive Performance Overview
+    </h1>
+  </div>
+
+  <p className="text-slate-500 mt-1 ml-5 text-sm md:text-base">
+    Real-time operational and financial insights across all active job sites.
+  </p>
+</div>
         <div className="flex flex-wrap gap-3">
           <div className="flex bg-white rounded-2xl shadow-sm border border-slate-100 p-1">
             {['Monthly', 'Quarterly', 'Yearly'].map((period) => (

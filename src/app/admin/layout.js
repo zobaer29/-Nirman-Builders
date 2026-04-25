@@ -1,10 +1,33 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [profileData, setProfileData] = useState({ username: 'Loading...', role: '', photoUrl: null });
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await fetch('/api/auth/profile', { method: 'GET' });
+        if (response.ok) {
+          const data = await response.json();
+          const roleName = data.user.roleId === 1 ? 'Super Admin' : 'Admin';
+          setProfileData({
+            username: data.user.username,
+            role: roleName,
+            photoUrl: data.user.photoUrl,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    fetchProfileData();
+  }, []);
 
   const navLinks = [
     { href: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true },
@@ -15,6 +38,43 @@ export default function AdminLayout({ children }) {
     { href: '/admin/chat', icon: 'chat', label: 'Chat' },
     { href: '/admin/report', icon: 'analytics', label: 'Reports' },
   ];
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        router.push('/login');
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const handleProfile = async () => {
+    try {
+      const response = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      if (response.ok) {
+
+        router.push('/admin/profile');
+      }
+      else {
+        console.error('Failed to load profile');
+      }
+    }
+    catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
   return (
     <div className="bg-surface text-on-background min-h-screen flex overflow-hidden font-body">
       {/* SideNavBar */}
@@ -66,7 +126,7 @@ export default function AdminLayout({ children }) {
         </nav>
 
         <div className="mt-auto pt-6 border-t border-zinc-100">
-          <button className="flex items-center gap-3 text-zinc-500 hover:text-error px-4 py-2.5 transition-colors font-medium text-sm w-full">
+          <button onClick={handleLogout} className="flex items-center gap-3 text-zinc-500 hover:text-error px-4 py-2.5 transition-colors font-medium text-sm w-full">
             <span className="material-symbols-outlined">logout</span>
             Log Out
           </button>
@@ -94,21 +154,31 @@ export default function AdminLayout({ children }) {
               <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
               <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
             </button>
-            <button className="p-2 hover:bg-zinc-200/50 rounded-lg transition-colors">
+            <button onClick={handleProfile} className="p-2 hover:bg-zinc-200/50 rounded-lg transition-colors">
               <span className="material-symbols-outlined text-on-surface-variant">settings</span>
             </button>
-            <div className="flex items-center gap-3 ml-2 pl-4 border-l border-surface-container-high">
+            <div
+              className="flex items-center gap-3 ml-2 pl-4 border-l border-surface-container-high cursor-pointer hover:opacity-80 transition-opacity"
+
+            >
               <div className="text-right">
                 <p className="text-xs font-bold font-headline text-on-surface">
-                  Admin User
+                  {profileData.username}
                 </p>
-                <p className="text-[10px] text-on-surface-variant">Super Admin</p>
+                <p className="text-[10px] text-on-surface-variant">{profileData.role}</p>
               </div>
-              <img
-                className="w-10 h-10 rounded-full object-cover border-2 border-primary/10"
-                alt="user portrait"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB08vo762b-Bun8QjwCmqKacbMN8s8-okekHBZzyXEd01PtGWGFs9kJllKSpRwXzBFj219t8EK58i8xU3SzQWRAd9qsLdxslw5AHzq-49wihgh8l3-WBZfosk_gcGpWalQnUiOu64AWiWp2tHK7j_F-njStxvstpRtnigZR-lSPjHYx3Oonjt4BvjnM_sl8pSbSQUorAGsvCbniBSfZ4p0UdOpQlwHO8Tv1uamU55uN4BItGhfIe06wcSaI5SX_XaJ-lc2iaXzX2n0"
-              />
+              {profileData.photoUrl ? (
+                <img
+                  className="w-10 h-10 rounded-full object-cover border-2 border-primary/10"
+                  alt="user portrait"
+                  src={profileData.photoUrl}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold border-2 border-primary/10">
+                  {profileData.username.charAt(0).toUpperCase()}
+                </div>
+              )}
             </div>
           </div>
         </header>
