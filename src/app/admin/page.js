@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function AdminDashboard() {
   return (
-    <>
+    <div className="w-full overflow-x-hidden">
       {/* Page Header */}
       <div className="mb-10">
         <h2 className="text-3xl font-extrabold font-headline text-on-surface tracking-tight">
@@ -14,8 +14,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Row 1: Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-surface-container-lowest rounded-xl p-6 border border-gray-100 transition-all hover:bg-surface-container-low mx-auto md:mx-0 w-full max-w-sm">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-surface-container-high rounded-full">
               <span className="material-symbols-outlined text-primary">business_center</span>
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
           <h3 className="text-4xl font-extrabold font-headline text-on-surface">24</h3>
         </div>
 
-        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100">
+        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100 mx-auto md:mx-0 w-full max-w-sm">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-primary-container rounded-full">
               <span className="material-symbols-outlined text-on-primary-container">pending_actions</span>
@@ -39,7 +39,7 @@ export default function AdminDashboard() {
           <h3 className="text-4xl font-extrabold font-headline text-on-surface">12</h3>
         </div>
 
-        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100">
+        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100 mx-auto md:mx-0 w-full max-w-sm">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-tertiary-container/20 rounded-full">
               <span className="material-symbols-outlined text-tertiary">task_alt</span>
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
           <h3 className="text-4xl font-extrabold font-headline text-on-surface">8</h3>
         </div>
 
-        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100">
+        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all hover:bg-surface-container-low border border-gray-100 mx-auto md:mx-0 w-full max-w-sm">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-error-container/20 rounded-full">
               <span className="material-symbols-outlined text-error">priority_high</span>
@@ -193,10 +193,10 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
         <div className="lg:col-span-7 relative overflow-hidden rounded-xl bg-primary-gradient p-10 flex items-center group cursor-pointer shadow-xl hover:shadow-2xl transition-all active:scale-[0.99]">
           <div className="relative z-10 flex-1">
-            <h3 className="text-3xl font-extrabold font-headline text-white mb-4 leading-tight">
+            <h3 className="text-3xl font-extrabold font-headline  mb-4 leading-tight">
               Ready to start a new build?
             </h3>
-            <p className="text-on-primary text-sm max-w-md mb-8">
+            <p className=" text-sm max-w-md mb-8">
               Initiate a new project workflow, assign initial staff, and set baseline milestones in one unified interface.
             </p>
             <button className="bg-primary-container text-on-primary-container font-bold px-8 py-4 rounded-full flex items-center gap-3 shadow-lg group-hover:bg-white transition-colors text-lg font-headline">
@@ -259,6 +259,6 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

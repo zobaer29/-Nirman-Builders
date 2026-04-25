@@ -77,17 +77,33 @@ body {
   vertical-align: middle;
 }
 
-.bg-primary-gradient {
-  background: linear-gradient(135deg, #006a28 0%, #005d22 100%);
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+.glass-dark {
+  background: rgba(15, 20, 20, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.premium-shadow {
+  box-shadow: 0 10px 30px -10px rgba(0, 106, 40, 0.15);
+}
+
+.premium-gradient {
+  background: linear-gradient(135deg, #006a28 0%, #00a844 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #006a28 0%, #00a844 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 
