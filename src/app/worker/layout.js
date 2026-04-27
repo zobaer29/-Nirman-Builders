@@ -55,13 +55,7 @@ export default function WorkerLayout({ children }) {
             <span className="material-symbols-outlined">chat</span>
             Messages
           </Link>
-          <Link
-            href="#"
-            className="text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg flex items-center gap-3 px-4 py-3 font-headline text-sm transition-colors duration-200"
-          >
-            <span className="material-symbols-outlined">settings</span>
-            Settings
-          </Link>
+
         </nav>
         <button className="mt-4 bg-[#006a28] text-[#cfffce] py-3 px-4 rounded-lg font-headline font-bold flex items-center justify-center gap-2 transition-transform active:scale-90">
           <span className="material-symbols-outlined">add</span>

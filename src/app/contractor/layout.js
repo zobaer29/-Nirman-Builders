@@ -17,25 +17,25 @@ export default function ContractorLayout({ children }) {
 
   const navItems = [
     { label: "Overview", href: "/contractor", icon: "grid_view" },
-    { label: "Active Projects", href: "#", icon: "architecture" },
-    { label: "Resources", href: "#", icon: "construction" },
-    { label: "Team Management", icon: "groups_2", href: "#" },
-    { label: "Analytics", href: "#", icon: "monitoring" },
-    { label: "Communication", href: "#", icon: "chat_bubble" },
+    { label: "Active Projects", href: "/contractor/projects", icon: "architecture" },
+    { label: "Resources", href: "/contractor/resources", icon: "construction" },
+    { label: "Team Management", icon: "groups_2", href: "/contractor/team" },
+    { label: "Analytics", href: "/contractor/analytics", icon: "monitoring" },
+    { label: "Communication", href: "/contractor/chat", icon: "chat_bubble" },
   ];
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
     <div className="bg-[#f4f7f6] text-on-background min-h-screen flex flex-col md:flex-row overflow-x-hidden font-body relative">
-      
+
       {/* Sidebar - Same style as Admin */}
       <aside
         className={`
-          ${isSidebarOpen ? 'w-64' : 'w-0 md:w-20'} 
-          h-screen bg-white flex flex-col py-6 px-4 shrink-0 overflow-y-auto border-r border-zinc-100 z-50 
-          transition-all duration-300 ease-in-out fixed md:relative z-[10000]
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          ${isSidebarOpen ? 'w-64' : 'w-0 md:w-20'}
+      h-screen bg-white flex flex-col py-6 px-4 shrink-0 overflow-y-auto border-r border-zinc-100 z-50
+      transition-all duration-300 ease-in-out fixed md:relative z-[10000]
+      ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
         {/* Branding */}
@@ -145,16 +145,18 @@ export default function ContractorLayout({ children }) {
       </main>
 
       {/* Mobile Sidebar Overlay - High z-index and explicit click handler */}
-      {isSidebarOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999]" 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSidebar();
-          }}
-        ></div>
-      )}
-    </div>
+      {
+        isSidebarOpen && (
+          <div
+            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999]"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleSidebar();
+            }}
+          ></div>
+        )
+      }
+    </div >
   );
 }
