@@ -1,211 +1,209 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function WorkerDashboard() {
+  const [isShiftActive, setIsShiftActive] = useState(false);
+  const [timer, setTimer] = useState(0);
+
+  useEffect(() => {
+    let interval;
+    if (isShiftActive) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isShiftActive]);
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <main className="p-8 max-w-7xl mx-auto w-full min-h-[calc(100vh-4rem)]">
-      {/* Welcome Header */}
-      <section className="mb-10">
-        <h1 className="font-headline text-4xl font-extrabold text-[#06361f] tracking-tight mb-2">
-          Worker Dashboard
-        </h1>
-        <p className="text-[#39644a] font-medium flex items-center gap-2">
-          <span className="material-symbols-outlined text-[#006a28]">location_on</span>
-          Current Site: Emerald Heights Tower B, Floor 14
-        </p>
+    <main className="p-10 max-w-[1600px] mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Hero Section */}
+      <section className="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8 bg-white p-10 rounded-[3rem] shadow-xl shadow-[#006a28]/5 border border-slate-100 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#f0fff4] rounded-full -mr-32 -mt-32 opacity-50"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-4">
+            <span className="bg-[#006a28] text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Technician Level 4</span>
+            <span className="text-[#548064] text-xs font-bold flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">verified</span>
+              Certified
+            </span>
+          </div>
+          <h1 className="font-black text-5xl text-[#06361f] tracking-tight mb-4">
+            Good Morning, <span className="text-[#006a28]">Arjun!</span>
+          </h1>
+          <p className="text-[#39644a] font-bold flex items-center gap-2 text-lg">
+            <span className="material-symbols-outlined text-[#006a28] text-2xl">location_on</span>
+            Emerald Heights • Tower B, Floor 14
+          </p>
+        </div>
+
+        {/* Shift Timer Widget */}
+        <div className="relative z-10 bg-[#06361f] p-8 rounded-[2.5rem] text-white min-w-[320px] shadow-2xl shadow-[#06361f]/20">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Active Shift</p>
+              <p className="text-4xl font-black font-mono tracking-wider">{formatTime(timer)}</p>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${isShiftActive ? 'bg-[#4bee74] animate-pulse shadow-[0_0_12px_#4bee74]' : 'bg-rose-500'}`}></div>
+          </div>
+          
+          <button 
+            onClick={() => setIsShiftActive(!isShiftActive)}
+            className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 ${
+              isShiftActive 
+              ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20' 
+              : 'bg-[#4bee74] hover:bg-[#3ddb66] text-[#06361f] shadow-lg shadow-[#4bee74]/20'
+            }`}
+          >
+            <span className="material-symbols-outlined text-xl">
+              {isShiftActive ? 'stop_circle' : 'play_circle'}
+            </span>
+            {isShiftActive ? 'End Work Day' : 'Start My Shift'}
+          </button>
+        </div>
       </section>
 
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-12 gap-6">
-        {/* Daily Tasks List (Col 1-8) */}
-        <div className="col-span-12 lg:col-span-8 space-y-6">
+      <div className="grid grid-cols-12 gap-8">
+        
+        {/* Task Board (Col 1-8) */}
+        <div className="col-span-12 lg:col-span-8 space-y-8">
           <div className="flex items-center justify-between">
-            <h3 className="font-headline font-bold text-xl text-[#06361f]">
-              Daily Tasks List
-            </h3>
-            <div className="flex gap-2">
-              <span className="bg-[#a8ecbf] px-3 py-1 rounded-full text-xs font-bold text-[#39644a]">
-                Today: Oct 24
-              </span>
+            <div>
+              <h3 className="font-black text-2xl text-[#06361f] tracking-tight">Today's Assignments</h3>
+              <p className="text-[#548064] text-xs font-bold mt-1">October 27, 2026 • 3 Active Tasks</p>
             </div>
+            <button className="bg-white border border-slate-200 text-[#006a28] px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#f0fff4] transition-all">
+              View History
+            </button>
           </div>
 
-          {/* Task Cards */}
-          <div className="space-y-4">
-            {/* Task 1 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#89b898]/10 group hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="material-symbols-outlined text-[#4bee74] text-sm" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-[#006a28]">High Priority</span>
+          <div className="grid grid-cols-1 gap-6">
+            {[
+              { 
+                id: 1, 
+                title: "Install HVAC Ducts in Corridor A", 
+                desc: "Check architectural blueprints for Floor 14 orientation.",
+                priority: "High", 
+                status: "In Progress",
+                time: "08:00 AM"
+              },
+              { 
+                id: 2, 
+                title: "Safety Drill & Equipment Check", 
+                desc: "Weekly mandatory site safety walkthrough with leads.",
+                priority: "Medium", 
+                status: "Pending",
+                time: "01:30 PM"
+              },
+              { 
+                id: 3, 
+                title: "Concrete Sample Collection", 
+                desc: "Batch 204 testing for moisture and density.",
+                priority: "Low", 
+                status: "Completed",
+                time: "10:45 AM"
+              },
+            ].map((task) => (
+              <div key={task.id} className={`group bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden ${task.status === 'Completed' ? 'opacity-60' : ''}`}>
+                {task.priority === 'High' && task.status !== 'Completed' && (
+                  <div className="absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 bg-rose-500 rotate-45 flex items-end justify-center pb-2 shadow-lg">
+                    <span className="material-symbols-outlined text-white text-lg">priority_high</span>
                   </div>
-                  <h4 className="font-headline font-bold text-lg text-[#06361f]">
-                    Install HVAC Ducts in Corridor A
-                  </h4>
-                  <p className="text-[#39644a] text-sm mt-1">
-                    Ensure compliance with the architectural blueprints for central cooling units.
-                  </p>
-                </div>
-                <span className="bg-[#78f5ae] text-[#005a35] px-3 py-1 rounded-full text-xs font-bold">
-                  In Progress
-                </span>
-              </div>
-              <div className="flex items-center justify-between pt-4 border-t border-[#89b898]/10">
-                <div className="flex -space-x-2">
-                  <img
-                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                    alt="Worker"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB99KPanY3GMsTLeILf7WR9-7j0lDCWMXjbAbe-jJtPUl6-w9HomuhZRXWYZ04-uW4VnIrfdwjul8QtxWfsmn00bQ3tUfXhU-MTb5g9Muy2MdlcE3Fq0SX_E2vbMxcDZsG-IrUMCo29xW7fczfOwlKewoOjyYNbkLgJbRhLLGxK-Ve34RR9mD3lXiP30CMXKpgUT-XZLJT7GmmQrkipnH7NPlz1-vbZEXoDtcxMMdQ0GCXWMlyofOGMpTHQ2rYv9HgF_pyGLZZokbs"
-                  />
-                  <img
-                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                    alt="Contractor"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2PCWqGrMRO7XAxr7nyuiEylH6wDKQIWLGI6Hcvi3qB0ntFo_EcvSkailgyZPV3N55kpi_fE-k-Hw_me_e2_pSnpMjXQPM7P_gkekgoFMMOQiidhohb1SgPVQz2A_f-pH7ICW95Tl_ZvZAW5SXLsfMmA34Wz0-snyZzEXm_ey99r3VVpu6cFtB5r2ohrOPh9ot4JZR-44jY6zynli2pgm8QAbVA-ge2_Fab63dxyLKk-Jw0SL_UVj5G4sz6ITO-NJwRebLM6O8xEc"
-                  />
-                  <div className="w-8 h-8 rounded-full bg-[#b2f1c7] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#06361f]">
-                    +2
+                )}
+                
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
+                        task.status === 'Completed' ? 'bg-slate-100 text-slate-500' : 'bg-[#f0fff4] text-[#006a28]'
+                      }`}>
+                        {task.status}
+                      </span>
+                      <span className="text-[10px] font-bold text-[#548064] flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">schedule</span>
+                        {task.time}
+                      </span>
+                    </div>
+                    <h4 className={`font-black text-xl text-[#06361f] tracking-tight mb-2 group-hover:text-[#006a28] transition-colors ${task.status === 'Completed' ? 'line-through' : ''}`}>
+                      {task.title}
+                    </h4>
+                    <p className="text-[#548064] text-sm font-medium">{task.desc}</p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button className="flex-1 md:flex-none px-8 py-3.5 bg-slate-50 text-[#06361f] rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95">
+                      Details
+                    </button>
+                    {task.status !== 'Completed' && (
+                      <button className="flex-1 md:flex-none px-8 py-3.5 bg-[#006a28] text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#005a22] transition-all shadow-lg shadow-[#006a28]/10 active:scale-95">
+                        {task.status === 'Pending' ? 'Start' : 'Finish'}
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button className="px-4 py-2 rounded-lg text-xs font-bold border border-[#89b898]/20 hover:bg-[#bbf6ce] transition-colors">
-                    View Details
-                  </button>
-                  <button className="px-4 py-2 bg-[#006a28] text-[#cfffce] rounded-lg text-xs font-bold active:scale-95 transition-transform">
-                    Complete Task
-                  </button>
-                </div>
               </div>
-            </div>
-
-            {/* Task 2 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#89b898]/10 group">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h4 className="font-headline font-bold text-lg text-[#06361f] opacity-50 line-through">
-                    Reinforce North-West Foundation Pillar
-                  </h4>
-                  <p className="text-[#39644a] text-sm mt-1">
-                    Wait for inspector approval before proceeding to next section.
-                  </p>
-                </div>
-                <span className="bg-[#a8ecbf] text-[#39644a] px-3 py-1 rounded-full text-xs font-bold">
-                  Completed
-                </span>
-              </div>
-              <div className="flex items-center justify-between pt-4 border-t border-[#89b898]/10">
-                <span className="text-xs text-[#39644a] font-medium flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">schedule</span>
-                  Finished at 10:45 AM
-                </span>
-                <button className="text-[#006a28] text-xs font-bold hover:underline">
-                  Reopen Task
-                </button>
-              </div>
-            </div>
-
-            {/* Task 3 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#89b898]/10">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h4 className="font-headline font-bold text-lg text-[#06361f]">
-                    Material Inspection: Cement Batch 204
-                  </h4>
-                  <p className="text-[#39644a] text-sm mt-1">
-                    Cross-verify density and moisture levels for the base layer.
-                  </p>
-                </div>
-                <span className="bg-[#b2f1c7] text-[#39644a] px-3 py-1 rounded-full text-xs font-bold">
-                  Pending
-                </span>
-              </div>
-              <div className="flex gap-2 pt-4 border-t border-[#89b898]/10">
-                <button className="flex-1 py-2 bg-[#00693f] text-[#cbffda] rounded-lg text-xs font-bold transition-all hover:opacity-90">
-                  Start Progress
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Schedule & Location (Col 9-12) */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-          {/* Work Schedule Widget */}
-          <div className="bg-[#c7fdd8] p-6 rounded-xl border border-[#89b898]/10">
-            <h3 className="font-headline font-bold text-lg text-[#06361f] mb-4">
-              Today's Schedule
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-2 h-12 bg-[#006a28] rounded-full"></div>
-                <div>
-                  <p className="text-xs font-bold text-[#006a28]">08:00 AM - 12:00 PM</p>
-                  <p className="text-sm font-bold text-[#06361f]">Floor 14 Ducting</p>
+        {/* Right Sidebar (Col 9-12) */}
+        <div className="col-span-12 lg:col-span-4 space-y-8">
+          
+          {/* Site Map Card */}
+          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden group">
+            <h3 className="font-black text-xl text-[#06361f] mb-6 tracking-tight">Active Site Location</h3>
+            <div className="relative h-56 rounded-3xl overflow-hidden border-4 border-slate-50 shadow-inner">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#f0fff4] to-[#c7fdd8] animate-pulse"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-10 p-6 text-center">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl text-[#006a28] mb-4 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-4xl">location_on</span>
                 </div>
+                <p className="text-xs font-black text-[#006a28] uppercase tracking-widest">Plot 42 • Sector 8</p>
+                <p className="text-[10px] font-bold text-[#548064] mt-1">Emerald Heights Residential</p>
               </div>
-              <div className="flex items-center gap-4 opacity-50">
-                <div className="w-2 h-12 bg-[#89b898] rounded-full"></div>
-                <div>
-                  <p className="text-xs font-bold">12:00 PM - 01:00 PM</p>
-                  <p className="text-sm font-bold">Lunch Break</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-2 h-12 bg-[#00693f] rounded-full"></div>
-                <div>
-                  <p className="text-xs font-bold text-[#00693f]">01:00 PM - 05:00 PM</p>
-                  <p className="text-sm font-bold text-[#06361f]">Safety Drill & Review</p>
-                </div>
-              </div>
+              {/* Decorative grid pattern */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#006a28 0.5px, transparent 0.5px)', backgroundSize: '12px 12px' }}></div>
             </div>
-
-            <div className="mt-6 p-4 rounded-lg bg-[#a8ecbf]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-[#39644a]">Site Location</span>
-                <button className="text-[#006a28] text-[10px] font-bold underline">
-                  Directions
-                </button>
-              </div>
-              <div className="h-32 rounded-lg bg-[#9ce4b6] overflow-hidden relative border border-[#548064]/20">
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <span className="material-symbols-outlined text-[#006a28] text-3xl" style={{ fontVariationSettings: '"FILL" 1' }}>
-                    location_on
-                  </span>
-                </div>
-                {/* Mock map background */}
-                <div className="w-full h-full bg-gradient-to-tr from-[#b2f1c7] to-[#9ce4b6]"></div>
-              </div>
-              <p className="mt-2 text-xs font-medium text-[#39644a] text-center">
-                Plot 42, Sector 8, Emerald Heights
-              </p>
-            </div>
+            <button className="w-full mt-6 py-4 bg-[#f0fff4] text-[#006a28] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#006a28] hover:text-white transition-all active:scale-95">
+              Open Navigator
+            </button>
           </div>
 
-          {/* Work Log Submission Area */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-[#89b898]/10">
-            <h3 className="font-headline font-bold text-lg text-[#06361f] mb-4">
-              Submit Work Log
-            </h3>
-            <form className="space-y-4">
+          {/* Quick Work Log */}
+          <div className="bg-[#006a28] p-10 rounded-[2.5rem] text-white shadow-2xl shadow-[#006a28]/20 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mt-16"></div>
+            <h3 className="font-black text-2xl mb-6 relative z-10">Quick Work Log</h3>
+            <form className="space-y-5 relative z-10">
               <div>
-                <label className="block text-xs font-bold text-[#39644a] mb-2">Task Details</label>
-                <select className="w-full bg-[#c7fdd8] border-none outline-none rounded-lg py-3 px-4 text-sm focus:ring-2 focus:ring-[#006a28]">
-                  <option>Select Completed Task</option>
-                  <option>HVAC Installation</option>
-                  <option>Foundation Reinforcement</option>
+                <label className="block text-[10px] font-black text-white/50 uppercase tracking-[0.2em] mb-2">Select Task</label>
+                <select className="w-full bg-white/10 border border-white/10 rounded-2xl py-4 px-5 text-sm text-white focus:ring-2 focus:ring-[#4bee74] outline-none appearance-none cursor-pointer">
+                  <option className="text-slate-900">HVAC Installation</option>
+                  <option className="text-slate-900">Safety Walkthrough</option>
+                  <option className="text-slate-900">Other / Maintenance</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-[#39644a] mb-2">Add Photo (Optional)</label>
-                <div className="border-2 border-dashed border-[#89b898]/30 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#006a28]/50 transition-colors">
-                  <span className="material-symbols-outlined text-[#89b898] mb-1">photo_camera</span>
-                  <span className="text-[10px] font-bold text-[#89b898]">TAP TO UPLOAD</span>
-                </div>
+              
+              <div className="bg-white/5 border border-dashed border-white/20 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all group">
+                <span className="material-symbols-outlined text-white/40 mb-2 text-3xl group-hover:scale-110 transition-transform">photo_camera</span>
+                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Snap Progress Photo</span>
               </div>
-              <button
-                className="w-full py-3 bg-[#06361f] text-white rounded-lg font-headline font-bold text-sm tracking-wide transition-all hover:bg-black active:scale-95"
-                type="button"
-              >
-                Submit Log
+
+              <button className="w-full py-5 bg-[#4bee74] text-[#06361f] rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-[#4bee74]/20 hover:bg-[#3ddb66] transition-all active:scale-95 mt-4">
+                Submit Report
               </button>
             </form>
           </div>
@@ -214,3 +212,4 @@ export default function WorkerDashboard() {
     </main>
   );
 }
+

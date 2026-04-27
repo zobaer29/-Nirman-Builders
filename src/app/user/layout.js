@@ -1,163 +1,170 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+
+const sidebaritems = [
+  { label: "Dashboard", href: "/user", icon: "dashboard" },
+  { label: "Projects", href: "/user/projects", icon: "architecture" },
+  { label: "Tasks", href: "/user/tasks", icon: "assignment" },
+  { label: "Inventory", href: "/user/inventory", icon: "inventory_2" },
+  { label: "Messages", href: "/user/chat", icon: "chat" },
+];
 
 export default function ClientLayout({ children }) {
+  const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   return (
-    <div className="bg-[#dcffe5] text-[#06361f] antialiased min-h-screen font-body">
-      {/* SideNavBar */}
-      <aside className="h-screen w-64 fixed left-0 top-0 bg-[#c7fdd8] flex flex-col p-4 gap-2 z-50 overflow-y-auto">
-        <div className="flex items-center gap-3 px-2 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-[#006a28] flex items-center justify-center">
-            <span className="material-symbols-outlined text-[#cfffce]">architecture</span>
+    <div className="bg-[#f8faf9] text-[#06361f] antialiased min-h-screen font-body flex flex-col md:flex-row overflow-x-hidden relative">
+      
+      {/* Sidebar */}
+      <aside
+        className={`
+          ${isSidebarOpen ? 'w-72' : 'w-0 md:w-24'} 
+          h-screen bg-white flex flex-col py-8 px-5 shrink-0 overflow-y-auto border-r border-slate-100 z-[10000] 
+          transition-all duration-500 ease-in-out fixed md:relative
+          ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
+        {/* Branding */}
+        <div className={`flex items-center gap-3 px-2 mb-12 overflow-hidden ${!isSidebarOpen && 'md:justify-center px-0'}`}>
+          <div className="w-12 h-12 shrink-0 rounded-2xl bg-[#006a28] flex items-center justify-center text-white shadow-xl shadow-[#006a28]/20">
+            <span className="material-symbols-outlined text-2xl">architecture</span>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-[#06361f] font-headline leading-none">
-              Nirman Builders
-            </h1>
-            <p className="text-[10px] font-medium tracking-widest text-[#548064] uppercase mt-1">
-              Editorial Dashboard
-            </p>
-          </div>
+          {isSidebarOpen && (
+            <div className="whitespace-nowrap">
+              <h1 className="text-xl font-black tracking-tighter text-[#06361f] font-headline leading-none">
+                Nirman <span className="text-[#006a28]">Client</span>
+              </h1>
+              <p className="text-[10px] font-black text-[#548064] uppercase tracking-[0.2em] mt-1.5">
+                Property Portal
+              </p>
+            </div>
+          )}
         </div>
 
-        <nav className="flex-1 space-y-1">
-          <Link
-            href="/client"
-            className="flex items-center gap-3 px-4 py-3 bg-[#ffffff] text-[#006a28] rounded-lg font-bold transition-transform active:scale-95 font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            Dashboard
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg transition-colors font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">architecture</span>
-            Projects
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg transition-colors font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">assignment</span>
-            Tasks
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg transition-colors font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">inventory_2</span>
-            Inventory
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg transition-colors font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">chat</span>
-            Messages
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg transition-colors font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">settings</span>
-            Settings
-          </Link>
+        {/* Navigation */}
+        <nav className="flex-1 space-y-2 overflow-x-hidden">
+          {sidebaritems.map((item, index) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={index}
+                href={item.href}
+                className={`
+                  flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group
+                  ${isActive 
+                    ? "bg-[#006a28] text-white shadow-xl shadow-[#006a28]/15 translate-x-1" 
+                    : "text-[#39644a] hover:text-[#006a28] hover:bg-[#f0fff4]"}
+                  ${!isSidebarOpen && 'md:justify-center md:px-0'}
+                `}
+              >
+                <span className={`material-symbols-outlined text-2xl transition-colors ${isActive ? "text-white" : "text-[#548064] group-hover:text-[#006a28]"}`}
+                      style={isActive ? { fontVariationSettings: '"FILL" 1' } : {}}>
+                  {item.icon}
+                </span>
+                {isSidebarOpen && <span className="whitespace-nowrap font-black text-sm tracking-tight">{item.label}</span>}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="mt-auto space-y-1 pt-4 border-t border-[#548064]/10">
-          <button className="w-full flex items-center gap-3 px-4 py-3 mb-4 bg-[#006a28] text-[#cfffce] rounded-lg font-bold text-sm shadow-sm transition-transform active:scale-95">
-            <span className="material-symbols-outlined">add</span>
-            New Project
-          </button>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-[#06361f] hover:bg-[#a8ecbf]/50 rounded-lg transition-colors font-headline text-sm"
-          >
-            <span className="material-symbols-outlined">help</span>
-            Help Center
-          </Link>
-          <button className="flex w-full items-center gap-3 px-4 py-3 text-[#b02500] font-headline text-sm hover:bg-[#b02500]/10 rounded-lg transition-colors">
-            <span className="material-symbols-outlined">logout</span>
-            Logout
+        {/* Footer */}
+        <div className={`mt-auto pt-8 border-t border-slate-100 ${!isSidebarOpen && 'md:items-center'}`}>
+          <button className={`flex items-center gap-4 text-[#548064] hover:text-rose-600 px-5 py-4 transition-all font-black text-sm w-full rounded-2xl hover:bg-rose-50 ${!isSidebarOpen && 'md:justify-center md:px-0'}`}>
+            <span className="material-symbols-outlined text-2xl">logout</span>
+            {isSidebarOpen && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="ml-64 min-h-screen">
-        {/* TopAppBar */}
-        <header className="sticky top-0 z-40 bg-[#dcffe5]/70 backdrop-blur-md flex justify-between items-center h-16 px-8 border-b border-emerald-900/10">
-          <div className="flex items-center gap-8">
-            <h2 className="text-[#06361f] font-headline font-bold text-lg">
-              Project Management
-            </h2>
-            <nav className="hidden md:flex gap-6 relative top-[1px]">
-              <Link
-                href="#"
-                className="text-[#006a28] border-b-2 border-[#006a28] font-headline font-semibold py-5"
-              >
-                Overview
-              </Link>
-              <Link
-                href="#"
-                className="text-[#548064] hover:text-[#006a28] font-headline font-semibold py-5 transition-all"
-              >
-                Schedule
-              </Link>
-              <Link
-                href="#"
-                className="text-[#548064] hover:text-[#006a28] font-headline font-semibold py-5 transition-all"
-              >
-                Documents
-              </Link>
-            </nav>
-          </div>
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden w-full relative">
+        
+        {/* Top Header */}
+        <header className="flex justify-between items-center w-full h-24 px-6 md:px-10 sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm">
           <div className="flex items-center gap-6">
-            <div className="relative group">
+            <button
+              onClick={toggleSidebar}
+              className="w-12 h-12 flex items-center justify-center hover:bg-[#f0fff4] rounded-2xl transition-all text-[#006a28] border border-slate-100"
+            >
+              <span className="material-symbols-outlined text-2xl">
+                {isSidebarOpen ? 'menu_open' : 'menu'}
+              </span>
+            </button>
+            <div className="hidden sm:block">
+              <h2 className="text-xl font-black text-[#06361f] tracking-tight">
+                {sidebaritems.find(item => item.href === pathname)?.label || "Overview"}
+              </h2>
+              <p className="text-[10px] font-black text-[#548064] uppercase tracking-widest mt-0.5">
+                Nirman Builders • Client Panel
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="relative hidden lg:block">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#548064] text-xl">
+                search
+              </span>
               <input
-                className="bg-[#c7fdd8] border-none outline-none rounded-full px-4 py-2 text-sm w-64 focus:ring-2 focus:ring-[#006a28] transition-all"
+                className="bg-slate-50 outline-none border border-slate-100 rounded-2xl py-3 pl-12 pr-6 text-sm w-80 focus:ring-4 focus:ring-[#006a28]/5 focus:bg-white transition-all font-medium"
                 placeholder="Search project data..."
                 type="text"
               />
-              <span className="material-symbols-outlined absolute right-3 top-2 text-[#548064]">
-                search
-              </span>
             </div>
+            
             <div className="flex items-center gap-4">
-              <button className="text-[#06361f] hover:bg-[#b2f1c7] p-2 rounded-full transition-colors relative">
-                <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-2 right-2 w-2 h-2 bg-[#b02500] rounded-full"></span>
+              <button className="w-12 h-12 flex items-center justify-center hover:bg-[#f0fff4] rounded-2xl transition-all relative border border-slate-100 text-[#548064]">
+                <span className="material-symbols-outlined text-2xl">notifications</span>
+                <span className="absolute top-3 right-3 w-3 h-3 bg-rose-500 rounded-full border-2 border-white"></span>
               </button>
-              <div className="flex items-center gap-3 pl-4 border-l border-[#548064]/20">
+
+              <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
                 <div className="text-right hidden sm:block">
-                  <p className="text-xs font-bold font-headline leading-none">
-                    Ar. Rajiv Nirman
-                  </p>
-                  <p className="text-[10px] text-[#548064] font-medium">Head Architect</p>
+                  <p className="text-xs font-black text-[#06361f]">Rahim Uddin</p>
+                  <p className="text-[10px] font-bold text-[#548064] uppercase tracking-widest">Premium Owner</p>
                 </div>
                 <img
-                  alt="User Profile"
-                  className="w-10 h-10 rounded-full border-2 border-[#5cfd80] shadow-sm object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ5SCJyy3yE3jJ26uyB8Z76Fa1ZnD5XNISGGGRQE5IKOqSJxLIjhoLzIMKdKVB7VKo0wdF4BEvIW_3u4pllA6ImobyBrhaynKJ7P0KETqwfPYaNNNrN3e425nmHYB5J37SVZZpehBiDWJMIVvni9UhBv_GGwRTH0had4iosqYbDSReKhI6rxnSy2fDxApiRcyrhn-zBE_YvDv1BfbResv7Hl8zr6QihzCV4QecBVfYzFyYGHkjXFCRNgqy8R6j8BZN3RkthEMWUy8"
+                  className="w-12 h-12 rounded-2xl object-cover border-2 border-[#006a28]/10 shadow-md"
+                  alt="user"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX5NT86IkP7CGz2_PvuqsegQojw1qrphEbDW8mCi3GICpx55gWfkZt7Y7bLTVl-UyC71qB3T_-6bgf9khuR9pFmHUxVZOKwqcepLOqEDO80KckqYy6UZepImHKEJU9oLmWrwlDlqI0JSRAsyjKfed3bG92SWJ5UaC9E_4kC_eQ-uhGg0F2AlMnm-vWvfGCvFFXglIMiriRXAkK-AP8x0rs6sK2qoNHHQR10EfTPbo3oq2Gcg1KFNZM3HwJkaKQwoKbFq1mOnxiBzI"
                 />
               </div>
             </div>
           </div>
         </header>
 
-        {children}
-      </main>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 hide-scrollbar scroll-smooth">
+          <div className="max-w-[1600px] mx-auto w-full">
+            {children}
+          </div>
+        </div>
+      </div>
 
-      {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-16 h-16 bg-[#006a28] text-[#cfffce] rounded-full shadow-2xl flex items-center justify-center group transition-all hover:w-48 hover:rounded-2xl z-50">
-        <span className="material-symbols-outlined group-hover:hidden" style={{ fontVariationSettings: '"FILL" 1' }}>
-          add_business
-        </span>
-        <span className="hidden group-hover:inline font-bold font-headline pl-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          New Request
-        </span>
-      </button>
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-[#06361f]/40 backdrop-blur-sm z-[9999] transition-opacity duration-500" 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+          }}
+        ></div>
+      )}
     </div>
   );
 }
