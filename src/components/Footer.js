@@ -1,6 +1,18 @@
+"use client";
+import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  const isDashboard = pathname.startsWith('/admin') || 
+                      pathname.startsWith('/user') || 
+                      pathname.startsWith('/contractor') || 
+                      pathname.startsWith('/worker');
+
+  if (isDashboard) return null;
+
   return (
     <footer className="bg-white text-slate-900 border-t border-gray-100 pt-16 pb-8 px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">

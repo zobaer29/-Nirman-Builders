@@ -85,7 +85,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Google Auth error:', error);
     return NextResponse.json(
-      { error: 'Internal server error during Google auth' },
+      { error: 'Internal server error during Google auth', details: error.message },
       { status: 500 }
     );
   }

@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 
 export default function AdminRequests() {
@@ -5,85 +6,87 @@ export default function AdminRequests() {
     <div className="grid grid-cols-12 gap-8">
       {/* Left Column: Primary Content */}
       <div className="col-span-12 lg:col-span-8 flex flex-col gap-8">
-        <div>
-          <h1 className="text-3xl font-extrabold text-on-surface font-headline">Project Request</h1>
-          <p className="text-on-surface-variant text-sm mt-1">
-            Monitor your company's active projects and pending requests.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold text-on-surface font-headline">Platform Requests</h1>
+            <p className="text-on-surface-variant text-sm mt-1">
+              Monitor project proposals and contractor applications.
+            </p>
+          </div>
         </div>
 
         {/* Main Table Card */}
-        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all duration-300 border border-gray-100">
+        <div className="bg-surface-container-lowest rounded-xl p-6 transition-all duration-300 border border-gray-100 min-h-[400px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold font-headline">Recent Project Requests</h3>
             <button className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline">
               View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-surface-container-low">
-                  <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label">
-                    Client Details
-                  </th>
-                  <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label">
-                    Type & Budget
-                  </th>
-                  <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y-0">
-                <tr className="group hover:bg-surface-container-lowest transition-colors">
-                  <td className="px-4 py-6">
-                    <p className="font-bold text-on-surface">TechNova Ltd.</p>
-                    <p className="text-xs text-on-surface-variant">Banani, Dhaka</p>
-                  </td>
-                  <td className="px-4 py-6">
-                    <p className="font-medium">Office Interior</p>
-                    <p className="text-xs text-tertiary">45 Lakh</p>
-                  </td>
-                  <td className="px-4 py-6">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-container/20 text-primary-dim">
-                      Estimating
-                    </span>
-                  </td>
-                  <td className="px-4 py-6 text-right">
-                    <div className="flex items-center justify-end gap-4">
-                      <button className="text-xs font-bold text-primary hover:underline transition-all">Approve</button>
-                      <button className="text-xs font-bold text-error hover:underline transition-all">Decline</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="group hover:bg-surface-container-lowest transition-colors">
-                  <td className="px-4 py-6">
-                    <p className="font-bold text-on-surface">Apex Holdings</p>
-                    <p className="text-xs text-on-surface-variant">Gulshan 2, Dhaka</p>
-                  </td>
-                  <td className="px-4 py-6">
-                    <p className="font-medium">Residential Complex</p>
-                    <p className="text-xs text-tertiary">12 Cr</p>
-                  </td>
-                  <td className="px-4 py-6">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">
-                      New Request
-                    </span>
-                  </td>
-                  <td className="px-4 py-6 text-right">
-                    <div className="flex items-center justify-end gap-4">
-                      <button className="text-xs font-bold text-primary hover:underline transition-all">Approve</button>
-                      <button className="text-xs font-bold text-error hover:underline transition-all">Decline</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-surface-container-low">
+                      <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label">
+                        Client Details
+                      </th>
+                      <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label">
+                        Type & Budget
+                      </th>
+                      <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-[10px] font-bold tracking-widest text-on-surface-variant uppercase font-label text-right">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y-0">
+                    <tr className="group hover:bg-surface-container-lowest transition-colors">
+                      <td className="px-4 py-6">
+                        <p className="font-bold text-on-surface">TechNova Ltd.</p>
+                        <p className="text-xs text-on-surface-variant">Banani, Dhaka</p>
+                      </td>
+                      <td className="px-4 py-6">
+                        <p className="font-medium">Office Interior</p>
+                        <p className="text-xs text-tertiary">45 Lakh</p>
+                      </td>
+                      <td className="px-4 py-6">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-container/20 text-primary-dim">
+                          Estimating
+                        </span>
+                      </td>
+                      <td className="px-4 py-6 text-right">
+                        <div className="flex items-center justify-end gap-4">
+                          <button className="text-xs font-bold text-primary hover:underline transition-all">Approve</button>
+                          <button className="text-xs font-bold text-error hover:underline transition-all">Decline</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="group hover:bg-surface-container-lowest transition-colors">
+                      <td className="px-4 py-6">
+                        <p className="font-bold text-on-surface">Apex Holdings</p>
+                        <p className="text-xs text-on-surface-variant">Gulshan 2, Dhaka</p>
+                      </td>
+                      <td className="px-4 py-6">
+                        <p className="font-medium">Residential Complex</p>
+                        <p className="text-xs text-tertiary">12 Cr</p>
+                      </td>
+                      <td className="px-4 py-6">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface-variant">
+                          New Request
+                        </span>
+                      </td>
+                      <td className="px-4 py-6 text-right">
+                        <div className="flex items-center justify-end gap-4">
+                          <button className="text-xs font-bold text-primary hover:underline transition-all">Approve</button>
+                          <button className="text-xs font-bold text-error hover:underline transition-all">Decline</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
         </div>
 
         {/* Create Project Banner */}

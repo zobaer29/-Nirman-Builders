@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function ContractorLayout({ children }) {
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default to closed for better mobile start
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export default function ContractorLayout({ children }) {
   const navItems = [
     { label: "Overview", href: "/contractor", icon: "grid_view" },
     { label: "Active Projects", href: "/contractor/projects", icon: "architecture" },
+    { label: "Role Requests", href: "/contractor/requests", icon: "person_add" },
     { label: "Resources", href: "/contractor/resources", icon: "construction" },
     { label: "Team Management", icon: "groups_2", href: "/contractor/team" },
     { label: "Analytics", href: "/contractor/analytics", icon: "monitoring" },
@@ -25,6 +27,17 @@ export default function ContractorLayout({ children }) {
   ];
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="bg-[#f4f7f6] text-on-background min-h-screen flex flex-col md:flex-row overflow-x-hidden font-body relative">
@@ -82,7 +95,10 @@ export default function ContractorLayout({ children }) {
 
         {/* Footer Actions */}
         <div className={`mt-auto pt-6 border-t border-zinc-100 ${!isSidebarOpen && 'md:items-center'}`}>
-          <button className={`flex items-center gap-3 text-zinc-500 hover:text-error px-4 py-2.5 transition-colors font-medium text-sm w-full ${!isSidebarOpen && 'md:justify-center md:px-0'}`}>
+          <button
+            onClick={handleLogout}
+            className={`flex items-center gap-3 text-zinc-500 hover:text-error px-4 py-2.5 transition-colors font-medium text-sm w-full ${!isSidebarOpen && 'md:justify-center md:px-0'}`}
+          >
             <span className="material-symbols-outlined">logout</span>
             {isSidebarOpen && <span>Log Out</span>}
           </button>

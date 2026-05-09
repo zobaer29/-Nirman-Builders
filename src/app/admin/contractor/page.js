@@ -1,6 +1,28 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 
 const Contractor = () => {
+    const [contractors, setContractors] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchContractors = async () => {
+            try {
+                const response = await fetch('/api/admin/contractors');
+                if (response.ok) {
+                    const data = await response.json();
+                    setContractors(data.contractors);
+                }
+            } catch (error) {
+                console.error("Error fetching contractors:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchContractors();
+    }, []);
+
     return (
         <div className="p-2 sm:p-6 lg:p-4">
             {/* Page Title */}
@@ -12,17 +34,15 @@ const Contractor = () => {
                     </p>
                 </div>
 
-                <button className="bg-[#006a28] hover:bg-[#005d22] transition-colors text-white px-5 py-2.5 rounded-full font-medium shadow-sm text-sm">
-                    Add Contractor
-                </button>
+
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <StatCard title="Total Contractors" value="124" />
-                <StatCard title="Active" value="86" />
-                <StatCard title="On Leave" value="14" />
-                <StatCard title="Pending" value="24" />
+                <StatCard title="Total Contractors" value={contractors.length} />
+                <StatCard title="Active" value={contractors.length} /> {/* Simplified for now */}
+                <StatCard title="On Leave" value="0" />
+                <StatCard title="Pending" value="0" />
             </div>
 
             {/* Table */}
@@ -33,36 +53,33 @@ const Contractor = () => {
                             <tr>
                                 <th className="p-5 font-semibold">Name</th>
                                 <th className="p-5 font-semibold">Expertise</th>
-                                <th className="p-5 font-semibold">Rating</th>
-                                <th className="p-5 font-semibold">Project</th>
+                                <th className="p-5 font-semibold">Experience</th>
+                                <th className="p-5 font-semibold">Contact</th>
                                 <th className="p-5 font-semibold">Status</th>
                             </tr>
                         </thead>
 
                         <tbody className="divide-y divide-surface-container-high">
-                            <TableRow
-                                name="Marcus Thompson"
-                                expertise="HVAC"
-                                rating="4.9"
-                                project="Corporate Tower"
-                                status="Active"
-                            />
-
-                            <TableRow
-                                name="Elena Rodriguez"
-                                expertise="Structural"
-                                rating="4.8"
-                                project="Bridge Phase II"
-                                status="Active"
-                            />
-
-                            <TableRow
-                                name="David Chen"
-                                expertise="Electrical"
-                                rating="4.7"
-                                project="-"
-                                status="Inactive"
-                            />
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="5" className="p-10 text-center text-zinc-500">Loading contractors...</td>
+                                </tr>
+                            ) : contractors.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="p-10 text-center text-zinc-500">No contractors found.</td>
+                                </tr>
+                            ) : (
+                                contractors.map((c) => (
+                                    <TableRow
+                                        key={c.id}
+                                        name={c.full_name || c.username}
+                                        expertise={c.specialization || "General"}
+                                        experience={c.experience ? `${c.experience} Years` : "-"}
+                                        contact={c.phone || c.email}
+                                        status="Active"
+                                    />
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -82,20 +99,17 @@ const StatCard = ({ title, value }) => (
     </div>
 );
 
-const TableRow = ({ name, expertise, rating, project, status }) => (
+const TableRow = ({ name, expertise, experience, contact, status }) => (
     <tr className="hover:bg-zinc-50/50 transition-colors">
         <td className="p-5 font-medium text-zinc-800">{name}</td>
         <td className="p-5 text-zinc-600">{expertise}</td>
-        <td className="p-5 text-zinc-600 flex items-center gap-1.5 h-full">
-            <span className="material-symbols-outlined text-amber-400 text-base" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-            {rating}
-        </td>
-        <td className="p-5 text-zinc-600">{project}</td>
+        <td className="p-5 text-zinc-600">{experience}</td>
+        <td className="p-5 text-zinc-600">{contact}</td>
         <td className="p-5">
             <span
                 className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${status === "Active"
-                        ? "bg-[#5cfd80]/20 text-[#006a28]"
-                        : "bg-zinc-100 text-zinc-500"
+                    ? "bg-[#5cfd80]/20 text-[#006a28]"
+                    : "bg-zinc-100 text-zinc-500"
                     }`}
             >
                 {status}

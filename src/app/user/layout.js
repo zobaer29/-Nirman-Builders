@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const sidebaritems = [
@@ -11,10 +11,12 @@ const sidebaritems = [
   { label: "Tasks", href: "/user/tasks", icon: "assignment" },
   { label: "Inventory", href: "/user/inventory", icon: "inventory_2" },
   { label: "Messages", href: "/user/chat", icon: "chat" },
+  { label: "Requests", href: "/user/requests", icon: "assignment_returned" }
 ];
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -25,9 +27,20 @@ export default function ClientLayout({ children }) {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="bg-[#f8faf9] text-[#06361f] antialiased min-h-screen font-body flex flex-col md:flex-row overflow-x-hidden relative">
-      
+
       {/* Sidebar */}
       <aside
         className={`
@@ -64,14 +77,14 @@ export default function ClientLayout({ children }) {
                 href={item.href}
                 className={`
                   flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group
-                  ${isActive 
-                    ? "bg-[#006a28] text-white shadow-xl shadow-[#006a28]/15 translate-x-1" 
+                  ${isActive
+                    ? "bg-[#006a28] text-white shadow-xl shadow-[#006a28]/15 translate-x-1"
                     : "text-[#39644a] hover:text-[#006a28] hover:bg-[#f0fff4]"}
                   ${!isSidebarOpen && 'md:justify-center md:px-0'}
                 `}
               >
                 <span className={`material-symbols-outlined text-2xl transition-colors ${isActive ? "text-white" : "text-[#548064] group-hover:text-[#006a28]"}`}
-                      style={isActive ? { fontVariationSettings: '"FILL" 1' } : {}}>
+                  style={isActive ? { fontVariationSettings: '"FILL" 1' } : {}}>
                   {item.icon}
                 </span>
                 {isSidebarOpen && <span className="whitespace-nowrap font-black text-sm tracking-tight">{item.label}</span>}
@@ -82,7 +95,10 @@ export default function ClientLayout({ children }) {
 
         {/* Footer */}
         <div className={`mt-auto pt-8 border-t border-slate-100 ${!isSidebarOpen && 'md:items-center'}`}>
-          <button className={`flex items-center gap-4 text-[#548064] hover:text-rose-600 px-5 py-4 transition-all font-black text-sm w-full rounded-2xl hover:bg-rose-50 ${!isSidebarOpen && 'md:justify-center md:px-0'}`}>
+          <button 
+            onClick={handleLogout}
+            className={`flex items-center gap-4 text-[#548064] hover:text-rose-600 px-5 py-4 transition-all font-black text-sm w-full rounded-2xl hover:bg-rose-50 ${!isSidebarOpen && 'md:justify-center md:px-0'}`}
+          >
             <span className="material-symbols-outlined text-2xl">logout</span>
             {isSidebarOpen && <span>Sign Out</span>}
           </button>
@@ -91,7 +107,7 @@ export default function ClientLayout({ children }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden w-full relative">
-        
+
         {/* Top Header */}
         <header className="flex justify-between items-center w-full h-24 px-6 md:px-10 sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm">
           <div className="flex items-center gap-6">
@@ -124,7 +140,7 @@ export default function ClientLayout({ children }) {
                 type="text"
               />
             </div>
-            
+
             <div className="flex items-center gap-4">
               <button className="w-12 h-12 flex items-center justify-center hover:bg-[#f0fff4] rounded-2xl transition-all relative border border-slate-100 text-[#548064]">
                 <span className="material-symbols-outlined text-2xl">notifications</span>
@@ -156,8 +172,8 @@ export default function ClientLayout({ children }) {
 
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-[#06361f]/40 backdrop-blur-sm z-[9999] transition-opacity duration-500" 
+        <div
+          className="md:hidden fixed inset-0 bg-[#06361f]/40 backdrop-blur-sm z-[9999] transition-opacity duration-500"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

@@ -39,6 +39,7 @@ export default function AdminLayout({ children }) {
     { href: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true },
     { href: '/admin/projects', icon: 'architecture', label: 'Projects' },
     { href: '/admin/requests', icon: 'list_alt', label: 'Requests' },
+    { href: '/admin/role-requests', icon: 'person_add', label: 'Role Applications' },
     { href: '/admin/contractor', icon: 'engineering', label: 'Contractors' },
     { href: '/admin/worker', icon: 'groups', label: 'Workers' },
     { href: '/admin/chat', icon: 'chat', label: 'Chat' },
