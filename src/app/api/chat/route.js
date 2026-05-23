@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 const SYSTEM_PROMPT = `You are Nirman Builders' AI assistant on the company website.
 You help visitors in Bangladesh with residential and commercial construction questions:
 cost estimates (BDT), timelines, materials, design ideas, and how to start a project.
@@ -67,34 +69,51 @@ function getFallbackReply(userText) {
   );
 }
 
-async function getOpenAIReply(messages) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+/** Gemini history must start with a user turn; skip UI-only welcome message. */
+function buildGeminiHistory(messages) {
+  const turns = messages.filter(
+    (m) => m.role === "user" || m.role === "assistant"
+  );
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || "OpenAI request failed");
+  let start = 0;
+  while (start < turns.length && turns[start].role === "assistant") {
+    start += 1;
   }
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || null;
+  const sliced = turns.slice(start);
+  if (sliced.length === 0) return { history: [], lastMessage: "" };
+
+  const last = sliced[sliced.length - 1];
+  const prior = sliced.slice(0, -1);
+
+  const history = prior.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+  return {
+    history,
+    lastMessage: last.role === "user" ? last.content : "",
+  };
+}
+
+async function getGeminiReply(messages) {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const { history, lastMessage } = buildGeminiHistory(messages);
+  if (!lastMessage.trim()) return null;
+
+  const modelName = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    systemInstruction: SYSTEM_PROMPT,
+  });
+
+  const chat = model.startChat({ history });
+  const result = await chat.sendMessage(lastMessage);
+  return result.response.text()?.trim() || null;
 }
 
 export async function POST(request) {
@@ -115,18 +134,41 @@ export async function POST(request) {
     }
 
     let reply = null;
+    let source = "fallback";
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+
+    if (!apiKey) {
+      return Response.json(
+        {
+          error:
+            "GEMINI_API_KEY is missing. Add it to .env and restart the dev server.",
+        },
+        { status: 503 }
+      );
+    }
 
     try {
-      reply = await getOpenAIReply(messages);
+      reply = await getGeminiReply(messages);
+      if (reply) source = "gemini";
     } catch (err) {
-      console.error("OpenAI error:", err.message);
+      console.error("Gemini error:", err.message);
+      if (err.message?.includes("429") || err.status === 429) {
+        return Response.json(
+          {
+            error:
+              "Gemini rate limit reached. Wait a minute and try again, or check billing in Google AI Studio.",
+          },
+          { status: 429 }
+        );
+      }
     }
 
     if (!reply) {
       reply = getFallbackReply(lastUser.content);
+      source = "fallback";
     }
 
-    return Response.json({ reply });
+    return Response.json({ reply, source });
   } catch (error) {
     console.error("Chat API error:", error);
     return Response.json(
