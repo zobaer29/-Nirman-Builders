@@ -1,8 +1,9 @@
 "use client";
-import { navigate } from "next/dist/client/components/segment-cache/navigation";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const RequestPage = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("selection");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
