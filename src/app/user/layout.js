@@ -9,7 +9,6 @@ const sidebaritems = [
   { label: "Dashboard", href: "/user", icon: "dashboard" },
   { label: "Projects", href: "/user/projects", icon: "architecture" },
   { label: "Tasks", href: "/user/tasks", icon: "assignment" },
-  { label: "Inventory", href: "/user/inventory", icon: "inventory_2" },
   { label: "Messages", href: "/user/chat", icon: "chat" },
   { label: "Requests", href: "/user/requests", icon: "assignment_returned" }
 ];
@@ -95,7 +94,7 @@ export default function ClientLayout({ children }) {
 
         {/* Footer */}
         <div className={`mt-auto pt-8 border-t border-slate-100 ${!isSidebarOpen && 'md:items-center'}`}>
-          <button 
+          <button
             onClick={handleLogout}
             className={`flex items-center gap-4 text-[#548064] hover:text-rose-600 px-5 py-4 transition-all font-black text-sm w-full rounded-2xl hover:bg-rose-50 ${!isSidebarOpen && 'md:justify-center md:px-0'}`}
           >
