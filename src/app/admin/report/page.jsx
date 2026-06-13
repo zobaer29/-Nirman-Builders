@@ -1,6 +1,27 @@
-import React from 'react';
+'use client';
+import React, { useState, useEffect } from 'react';
 
 const ReportPage = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/report')
+      .then(res => res.json())
+      .then(d => { setData(d); setLoading(false); })
+      .catch(err => { console.error(err); setLoading(false); });
+  }, []);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>;
+  }
+
+  if (!data || data.error) {
+    return <div className="p-10 text-center text-red-500">Failed to load report data.</div>;
+  }
+
+  const { overviewStats, projectPerformance, budgetAllocation, contractorPerformance } = data;
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-4 md:p-6">
       {/* Page Header & Filters */}
@@ -49,10 +70,10 @@ const ReportPage = () => {
       {/* Overview Stats Grid - Modern Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { title: 'TOTAL REVENUE', value: '$4.28M', change: '+12.4%', changeType: 'up', icon: 'payments', color: 'emerald' },
-          { title: 'COMPLETION RATE', value: '87.4%', change: 'On Track', changeType: 'neutral', icon: 'task_alt', color: 'blue' },
-          { title: 'ACTIVE RESOURCES', value: '1,240', change: '94% Capacity', changeType: 'neutral', icon: 'engineering', color: 'amber' },
-          { title: 'SAFETY INCIDENTS', value: '0.12', change: '-20% YoY', changeType: 'down', icon: 'health_and_safety', color: 'rose' },
+          { title: 'TOTAL REVENUE', value: overviewStats?.totalRevenue || '$0', change: '+12.4%', changeType: 'up', icon: 'payments', color: 'emerald' },
+          { title: 'COMPLETION RATE', value: overviewStats?.completionRate || '0%', change: 'On Track', changeType: 'neutral', icon: 'task_alt', color: 'blue' },
+          { title: 'ACTIVE RESOURCES', value: String(overviewStats?.activeResources || 0), change: '94% Capacity', changeType: 'neutral', icon: 'engineering', color: 'amber' },
+          { title: 'SAFETY INCIDENTS', value: overviewStats?.safetyIncidents || '0.0', change: '-20% YoY', changeType: 'down', icon: 'health_and_safety', color: 'rose' },
         ].map((stat) => (
           <div key={stat.title} className="group bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-slate-200">
             <div className="flex justify-between items-start mb-4">
@@ -93,12 +114,7 @@ const ReportPage = () => {
             </div>
           </div>
           <div className="space-y-6">
-            {[
-              { name: 'Skyline Tower A', actual: 92, target: 100 },
-              { name: 'Bridge Infrastructure #42', actual: 65, target: 80 },
-              { name: 'Eco-Park Residential', actual: 48, target: 45 },
-              { name: 'Harbor Expansion Phase II', actual: 21, target: 30 },
-            ].map((project) => (
+            {projectPerformance && projectPerformance.length > 0 ? projectPerformance.map((project) => (
               <div key={project.name} className="group">
                 <div className="flex justify-between text-sm font-bold text-slate-700 mb-2">
                   <span>{project.name}</span>
@@ -115,7 +131,9 @@ const ReportPage = () => {
                   />
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-center text-sm text-slate-500 font-bold py-4">No active projects found.</p>
+            )}
           </div>
         </div>
 
@@ -132,16 +150,16 @@ const ReportPage = () => {
               <circle cx="50" cy="50" fill="none" r="40" stroke="#34d399" strokeDasharray="251.2" strokeDashoffset="238.64" strokeWidth="12" strokeLinecap="round" />
             </svg>
             <div className="absolute flex flex-col items-center bg-white/80 backdrop-blur-sm p-3 rounded-full">
-              <span className="text-2xl font-bold text-slate-900">$2.1M</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Utilized</span>
+              <span className="text-2xl font-bold text-slate-900">{budgetAllocation?.total || '$0'}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
             {[
-              { label: 'Materials', percent: '60%', amount: '$1.2M', color: 'bg-emerald-500' },
-              { label: 'Labor', percent: '20%', amount: '$420k', color: 'bg-teal-600' },
-              { label: 'Equipment', percent: '15%', amount: '$315k', color: 'bg-emerald-300' },
-              { label: 'Other', percent: '5%', amount: '$105k', color: 'bg-slate-200' },
+              { label: 'Materials', percent: `${budgetAllocation?.materials?.percent}%`, amount: budgetAllocation?.materials?.amount, color: 'bg-emerald-500' },
+              { label: 'Labor', percent: `${budgetAllocation?.labor?.percent}%`, amount: budgetAllocation?.labor?.amount, color: 'bg-teal-600' },
+              { label: 'Equipment', percent: `${budgetAllocation?.equipment?.percent}%`, amount: budgetAllocation?.equipment?.amount, color: 'bg-emerald-300' },
+              { label: 'Other', percent: `${budgetAllocation?.other?.percent}%`, amount: budgetAllocation?.other?.amount, color: 'bg-slate-200' },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors">
                 <div className={`w-3 h-3 rounded-full ${item.color} shadow-sm`}></div>
@@ -187,11 +205,7 @@ const ReportPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {[
-                { name: 'Steel Masters Inc.', specialty: 'Structural Works', initials: 'SM', rating: 4.8, onTime: 98, variance: -2.4, varianceType: 'negative', status: 'Top Tier', statusColor: 'emerald' },
-                { name: 'Build-Pro Logistics', specialty: 'Supply Chain', initials: 'BP', rating: 5.0, onTime: 95, variance: 1.2, varianceType: 'positive', status: 'Top Tier', statusColor: 'emerald' },
-                { name: 'Global Electric', specialty: 'MEP Services', initials: 'GE', rating: 3.2, onTime: 82, variance: 8.5, varianceType: 'positive', status: 'Review Required', statusColor: 'amber' },
-              ].map((contractor) => (
+              {contractorPerformance && contractorPerformance.length > 0 ? contractorPerformance.map((contractor) => (
                 <tr key={contractor.name} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -234,13 +248,17 @@ const ReportPage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm ${
-                      contractor.statusColor === 'emerald' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                      contractor.statusColor === 'emerald' ? 'bg-emerald-50 text-emerald-700' : contractor.statusColor === 'blue' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'
                     }`}>
                       {contractor.status}
                     </span>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-sm font-bold text-slate-500">No contractors found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

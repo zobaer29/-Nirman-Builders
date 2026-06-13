@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const pathname = usePathname();
   const router = useRouter();
   const [profileData, setProfileData] = useState({ username: 'Loading...', role: '', photoUrl: null });
+  const [dashboardData, setDashboardData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -32,7 +33,21 @@ export default function AdminDashboard() {
         console.error('Error fetching profile:', error);
       }
     };
+    
+    const fetchDashboardData = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard');
+        if (res.ok) {
+          const data = await res.json();
+          setDashboardData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard:', error);
+      }
+    };
+
     fetchProfileData();
+    fetchDashboardData();
   }, []);
 
   return (
@@ -57,10 +72,10 @@ export default function AdminDashboard() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Projects", value: "24", icon: "business_center", color: "bg-indigo-500" },
-          { label: "Ongoing", value: "12", icon: "pending_actions", color: "bg-amber-500" },
-          { label: "Completed", value: "08", icon: "task_alt", color: "bg-[#006a28]" },
-          { label: "Pending Requests", value: "04", icon: "priority_high", color: "bg-rose-500", isError: true },
+          { label: "Total Projects", value: dashboardData?.stats?.totalProjects || "00", icon: "business_center", color: "bg-indigo-500" },
+          { label: "Ongoing", value: dashboardData?.stats?.ongoingProjects || "00", icon: "pending_actions", color: "bg-amber-500" },
+          { label: "Completed", value: dashboardData?.stats?.completedProjects || "00", icon: "task_alt", color: "bg-[#006a28]" },
+          { label: "Pending Requests", value: dashboardData?.stats?.pendingRequests || "00", icon: "priority_high", color: "bg-rose-500", isError: true },
         ].map((stat, i) => (
           <div key={i} className="group bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
             <div className="flex justify-between items-start mb-6">
@@ -95,35 +110,32 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {[
-                  { name: "Rahim Uddin", init: "RU", desc: "Commercial Renovation", type: "Interior Fit-out", budget: "৳ 45.0L", status: "Pending Review" },
-                  { name: "TechNova Ltd.", init: "TN", desc: "Office Expansion", type: "Structural Build", budget: "৳ 2.8Cr", status: "Estimating", active: true },
-                  { name: "Karim Hasan", init: "KH", desc: "Residential Villa", type: "Ground Up", budget: "৳ 1.2Cr", status: "Pending Review" },
-                ].map((row, i) => (
-                  <tr key={i} className="group hover:bg-[#f0fff4]/30 transition-all cursor-pointer">
+                {dashboardData?.recentRequests?.length > 0 ? dashboardData.recentRequests.map((row, i) => (
+                  <tr key={row.id || i} className="group hover:bg-[#f0fff4]/30 transition-all cursor-pointer">
                     <td className="py-6 px-4">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center font-black text-[#006a28] border border-slate-100 group-hover:bg-white group-hover:shadow-md transition-all">
-                          {row.init}
+                          {row.client_name ? row.client_name.substring(0, 2).toUpperCase() : 'CL'}
                         </div>
                         <div>
-                          <p className="font-black text-[#06361f] text-sm tracking-tight">{row.name}</p>
-                          <p className="text-[10px] font-bold text-[#548064] uppercase tracking-wide">{row.desc}</p>
+                          <p className="font-black text-[#06361f] text-sm tracking-tight">{row.client_name || 'Client'}</p>
+                          <p className="text-[10px] font-bold text-[#548064] uppercase tracking-wide">{row.name}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-6 px-4">
-                      <p className="font-bold text-[#06361f] text-sm">{row.type}</p>
-                      <p className="text-[10px] font-black text-[#006a28] tracking-widest">{row.budget}</p>
+                      <p className="font-bold text-[#06361f] text-sm">{row.project_type || 'General'}</p>
+                      <p className="text-[10px] font-black text-[#006a28] tracking-widest">{row.budget ? `৳ ${row.budget}` : 'TBD'}</p>
                     </td>
                     <td className="py-6 px-4 text-right">
-                      <span className={`inline-block px-4 py-1.5 text-[9px] font-black rounded-full uppercase tracking-widest border ${row.active ? 'bg-[#006a28] text-white border-[#006a28]' : 'bg-white text-[#548064] border-slate-200'
-                        }`}>
+                      <span className={`inline-block px-4 py-1.5 text-[9px] font-black rounded-full uppercase tracking-widest border ${row.status === 'Ongoing' ? 'bg-[#006a28] text-white border-[#006a28]' : 'bg-white text-[#548064] border-slate-200'}`}>
                         {row.status}
                       </span>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr><td colSpan="3" className="py-8 text-center text-[#548064] font-bold">No recent requests</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -133,12 +145,8 @@ export default function AdminDashboard() {
         <div className="col-span-12 lg:col-span-4 bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm flex flex-col">
           <h4 className="text-2xl font-black text-[#06361f] tracking-tight mb-10">Project Milestones</h4>
           <div className="space-y-10 flex-1">
-            {[
-              { name: "Skyline Tower", progress: 65 },
-              { name: "Green Valley Villa", progress: 85 },
-              { name: "City Mall Renovation", progress: 15 },
-            ].map((m, i) => (
-              <div key={i} className="space-y-3">
+            {dashboardData?.milestones?.length > 0 ? dashboardData.milestones.map((m, i) => (
+              <div key={m.id || i} className="space-y-3">
                 <div className="flex justify-between items-end">
                   <p className="text-sm font-black text-[#06361f] tracking-tight">{m.name}</p>
                   <p className="text-xs font-black text-[#006a28]">{m.progress}%</p>
@@ -150,7 +158,9 @@ export default function AdminDashboard() {
                   ></div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-center text-[#548064] font-bold py-4">No ongoing projects.</p>
+            )}
           </div>
           <div className="mt-10 pt-8 border-t border-slate-50">
             <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-3">
@@ -188,21 +198,22 @@ export default function AdminDashboard() {
         <div className="col-span-12 lg:col-span-4 bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm flex flex-col">
           <h4 className="text-2xl font-black text-[#06361f] tracking-tight mb-8">Contractors</h4>
           <div className="space-y-6 flex-1">
-            {[
-              { name: "Jamal Electricals", status: "Available Now", statusColor: "text-[#006a28]", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBtj4SAd8nMylozm0Aa6vfx26BgzOgnAxW-0buFYTYtaRMRd6hn62aHtz8aNV2tvLvbw8xuzfZWlHI9nZSFTI4TI6ClRcYHOp3PNBdEbnW69acSLsfPlMsiTHdGHBLO7NTVHwli1IUw0V-R6ECdndRhJMUX8WO8G51LFld9l1Ruqp8VArQHjXtxBdvTuQw-7ZbsasXn0tbV2CASgoakauh12jem7KWsIq6QUO164ONT-RlUHjogrfv8_q0n49KMvyLmXvdeEZxP1ws" },
-              { name: "M/S Haque Builders", status: "Busy until June 1", statusColor: "text-rose-500", busy: true, img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBtmzd4836IbicagH1V31RVBfhmLl3s6mGxe7DS0hJkxY4UCw3_hWWqfdHfI9tpKAE0ku6MN1MXV-y7aIyFUKqQrG85aZ1ASZJQoPnM9VmtubBt0YHs0WUBm5iLUwp2wTy-fgQSb3wRd3wUTSgb4zOTA3skfpaeiOHvAyNyKlQnqDqMzsRZBeKLM3E2ntP0_tIhsFuRwe2Qrdwg-KgIxPOxngku8Mg-0fK1T-38KFtIZSonzsnBgvO5pZ0FdP3X1Te1TRqu_KLzwx8" },
-              { name: "Rana Plumbing", status: "Available Now", statusColor: "text-[#006a28]", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBVQM8aqmXA3MAe8O3wrqpoxPbml-iP9CTNqVYwtIoQnlD1u_mt72aMmd3r5cH0YuBIbGAr0aovbMmqXSMw_2rSKAgH5PbFRobWGInUKC-vo8Hi6Tee3TE-2E8WTxvf5oSiocBkhSvlHjoPxkdjiIeSN9q81AaIm6JVji52KN-9CCRC9GPhsioDqz0XhymBnuvQcErSNqeSCGavQy0ykmvpf5iLVCc1BprLsABx1ISggxJNvZMVZbWeMv_j0wPtl35srSO9_J_fE4M" },
-            ].map((c, i) => (
-              <div key={i} className="flex items-center gap-5 p-4 rounded-3xl hover:bg-slate-50 transition-colors cursor-pointer group">
-                <div className={`w-16 h-16 rounded-2xl overflow-hidden shadow-sm border-2 border-white ${c.busy ? 'grayscale opacity-50' : ''}`}>
-                  <img className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" src={c.img} alt={c.name} />
+            {dashboardData?.contractors?.length > 0 ? dashboardData.contractors.map((c, i) => {
+              // Mock busy status based on ID simply for UI demonstration since actual busy logic isn't defined yet
+              const isBusy = (i % 2 !== 0); 
+              return (
+              <div key={c.id || i} className="flex items-center gap-5 p-4 rounded-3xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                <div className={`w-16 h-16 rounded-2xl overflow-hidden shadow-sm border-2 border-white ${isBusy ? 'grayscale opacity-50' : ''}`}>
+                  <img className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" src={c.photoUrl || `https://i.pravatar.cc/150?img=${10 + i}`} alt={c.full_name || c.username} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-black text-[#06361f] text-sm truncate tracking-tight">{c.name}</p>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mt-0.5 ${c.statusColor}`}>{c.status}</p>
+                  <p className="font-black text-[#06361f] text-sm truncate tracking-tight">{c.full_name || c.username}</p>
+                  <p className={`text-[10px] font-black uppercase tracking-widest mt-0.5 ${isBusy ? 'text-rose-500' : 'text-[#006a28]'}`}>{isBusy ? 'Busy until next week' : 'Available Now'}</p>
                 </div>
               </div>
-            ))}
+            )}) : (
+              <p className="text-center text-[#548064] font-bold py-4">No contractors found.</p>
+            )}
           </div>
           <button className="mt-10 w-full py-5 rounded-[2rem] border-2 border-slate-100 text-[10px] font-black text-[#548064] uppercase tracking-[0.2em] hover:bg-[#006a28] hover:text-white hover:border-[#006a28] transition-all active:scale-95">
             View Directory

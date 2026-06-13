@@ -7,12 +7,27 @@ import { usePathname, useRouter } from 'next/navigation';
 export default function ContractorLayout({ children }) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default to closed for better mobile start
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     // Open sidebar by default only on desktop
     if (window.innerWidth >= 768) {
       setIsSidebarOpen(true);
     }
+
+    // Fetch contractor profile
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/api/contractor/profile');
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error('Failed to load profile in layout', err);
+      }
+    };
+    fetchProfile();
   }, []);
   const pathname = usePathname();
 
@@ -140,17 +155,31 @@ export default function ContractorLayout({ children }) {
               <span className="material-symbols-outlined text-zinc-600">notifications</span>
               <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
             </button>
-            <div className="flex items-center gap-3 ml-2 pl-4 border-l border-zinc-200">
+            <Link 
+              href="/contractor/profile" 
+              className="flex items-center gap-3 ml-2 pl-4 border-l border-zinc-200 hover:opacity-85 transition-opacity"
+            >
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-zinc-900">Rajesh Kumar</p>
-                <p className="text-[10px] text-zinc-500">Lead Contractor</p>
+                <p className="text-xs font-bold text-zinc-900">
+                  {profile?.details?.full_name || profile?.user?.username || 'Contractor'}
+                </p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                  {profile?.details?.specialization || 'Lead Contractor'}
+                </p>
               </div>
-              <img
-                className="w-10 h-10 rounded-full object-cover border-2 border-zinc-100"
-                alt="user portrait"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3L7pkH_7FMaxKJg89KtwSxcZajf2JvQJo5c-yiRgPJysEzbV69MhNNbCL14aWqBPQJPP6voJIwgOONtNnYIq_MEshHmFtsuUKa18aIokBMVHQu5aWcerZNo4-XUmLSv2t9x43KUYs1owUGrDxEhGtFXI8lTJqAvEmMXuwWVkFs9jEhle60OhOLLjG_l5SjSqpXMIhQpEPFjk5sEusbku6hwGRSMFkVzOd_FVkjPINCVN-M33XDKTTixYvB_LNfoOUb5yuiTzyxqQ"
-              />
-            </div>
+              {profile?.user?.photoUrl ? (
+                <img
+                  className="w-10 h-10 rounded-full object-cover border-2 border-zinc-100 shadow-sm"
+                  alt="contractor portrait"
+                  src={profile.user.photoUrl}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-black text-sm shadow-sm">
+                  {(profile?.user?.username || 'C').charAt(0).toUpperCase()}
+                </div>
+              )}
+            </Link>
           </div>
         </header>
 

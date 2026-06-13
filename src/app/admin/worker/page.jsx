@@ -1,8 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const WorkerPage = () => {
+    const [workers, setWorkers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        const fetchWorkers = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch("/api/admin/workers");
+                if (res.ok) {
+                    const data = await res.json();
+                    setWorkers(data.workers || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch workers", err);
+            }
+            setLoading(false);
+        };
+        fetchWorkers();
+    }, []);
+
+    const filteredWorkers = workers.filter(w => 
+        w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        w.trade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        w.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        w.id.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             
@@ -14,24 +42,14 @@ const WorkerPage = () => {
                         Oversee field workers and site assignments
                     </p>
                 </div>
-
-                <div className="flex gap-4">
-                    <button className="bg-white border border-slate-100 hover:bg-[#f0fff4] text-[#006a28] px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm transition-all active:scale-95">
-                        Export Directory
-                    </button>
-                    <button className="bg-[#006a28] text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#006a28]/20 transition-all active:scale-95 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">person_add</span>
-                        Onboard Worker
-                    </button>
-                </div>
             </div>
 
             {/* Stats Dashboard */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Field Workers" value="482" icon="groups" color="bg-indigo-500" />
-                <StatCard title="Active On Site" value="315" icon="engineering" color="bg-[#006a28]" />
-                <StatCard title="On Leave" value="42" icon="event_busy" color="bg-amber-500" />
-                <StatCard title="Safety Issues" value="3" icon="warning" color="bg-rose-500" isAlert={true} />
+                <StatCard title="Total Field Workers" value={workers.length} icon="groups" color="bg-indigo-500" />
+                <StatCard title="Active On Site" value={workers.filter(w => w.status === 'On Site').length} icon="engineering" color="bg-[#006a28]" />
+                <StatCard title="On Leave" value={workers.filter(w => w.status === 'On Leave').length} icon="event_busy" color="bg-amber-500" />
+                <StatCard title="Off Duty" value={workers.filter(w => w.status === 'Off Duty').length} icon="home" color="bg-slate-400" />
             </div>
 
             {/* Worker List Table */}
@@ -40,54 +58,49 @@ const WorkerPage = () => {
                     <h3 className="font-black text-xl text-[#06361f]">Active Directory</h3>
                     <div className="relative">
                         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#548064] text-lg">search</span>
-                        <input type="text" placeholder="Filter by name or ID..." className="bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-6 text-xs w-64 focus:ring-4 focus:ring-[#006a28]/5 outline-none font-medium" />
+                        <input 
+                            type="text" 
+                            placeholder="Filter by name, trade or ID..." 
+                            className="bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-6 text-xs w-64 focus:ring-4 focus:ring-[#006a28]/5 outline-none font-medium" 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b border-slate-50 bg-slate-50/50">
-                                <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase">Worker Profile</th>
-                                <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase">Trade / Skill</th>
-                                <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase">Current Assignment</th>
-                                <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase text-right">Status</th>
-                            </tr>
-                        </thead>
+                    {loading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="w-8 h-8 border-4 border-[#006a28] border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : filteredWorkers.length === 0 ? (
+                        <div className="p-10 text-center text-sm text-slate-500">
+                            No workers found.
+                        </div>
+                    ) : (
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-slate-50 bg-slate-50/50">
+                                    <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase">Worker Profile</th>
+                                    <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase">Trade / Skill</th>
+                                    <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase">Current Assignment</th>
+                                    <th className="p-8 text-[10px] font-black tracking-widest text-[#548064] uppercase text-right">Status</th>
+                                </tr>
+                            </thead>
 
-                        <tbody className="divide-y divide-slate-50">
-                            <TableRow
-                                id="W-10492"
-                                name="James Patterson"
-                                trade="Masonry"
-                                site="Corporate Tower P-3"
-                                status="On Site"
-                            />
-
-                            <TableRow
-                                id="W-10501"
-                                name="Michael Chang"
-                                trade="Welder"
-                                site="Bridge Phase II"
-                                status="On Site"
-                            />
-
-                            <TableRow
-                                id="W-10433"
-                                name="Robert O'Neil"
-                                trade="Carpenter"
-                                site="-"
-                                status="Off Duty"
-                            />
-                            
-                            <TableRow
-                                id="W-10319"
-                                name="Samuel L. Jackson"
-                                trade="Heavy Equipment"
-                                site="Metro Expansion"
-                                status="On Leave"
-                            />
-                        </tbody>
-                    </table>
+                            <tbody className="divide-y divide-slate-50">
+                                {filteredWorkers.map(w => (
+                                    <TableRow
+                                        key={w.id}
+                                        id={w.id}
+                                        name={w.name}
+                                        trade={w.trade}
+                                        site={w.site}
+                                        status={w.status}
+                                    />
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
                 <div className="p-8 border-t border-slate-50 bg-slate-50/30 flex justify-center">
                     <button className="text-[10px] font-black text-[#548064] uppercase tracking-widest hover:text-[#006a28] transition-colors">Load More Personnel</button>

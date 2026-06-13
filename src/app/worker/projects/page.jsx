@@ -1,29 +1,28 @@
 "use client";
 
-import React from "react";
-
-const sites = [
-  {
-    id: 1,
-    name: "Emerald Heights",
-    location: "Sector 8, Plot 42",
-    supervisor: "Rajesh Sharma",
-    role: "Lead Technician",
-    status: "Active",
-    progress: 85,
-  },
-  {
-    id: 2,
-    name: "Skyline Residency",
-    location: "Main Road, Block C",
-    supervisor: "Amit Verma",
-    role: "Support Tech",
-    status: "Upcoming",
-    progress: 0,
-  },
-];
+import React, { useState, useEffect } from "react";
 
 const AssignedSites = () => {
+  const [sites, setSites] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/worker/projects");
+        if (res.ok) {
+          const data = await res.json();
+          setSites(data.sites || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch worker projects", err);
+      }
+      setLoading(false);
+    };
+    fetchSites();
+  }, []);
+
   return (
     <div className="p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       

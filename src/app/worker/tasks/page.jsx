@@ -1,16 +1,55 @@
 "use client";
 
-import React, { useState } from "react";
-
-const initialTasks = [
-  { id: 1, title: "Install HVAC Ducts", site: "Emerald Heights", status: "In Progress", priority: "High", time: "08:00 AM" },
-  { id: 2, title: "Safety Drill", site: "Emerald Heights", status: "Pending", priority: "Medium", time: "01:30 PM" },
-  { id: 3, title: "Check Cement Batch", site: "Skyline Residency", status: "Pending", priority: "High", time: "Tomorrow" },
-  { id: 4, title: "Foundation Check", site: "Emerald Heights", status: "Completed", priority: "Low", time: "Yesterday" },
-];
+import React, { useState, useEffect } from "react";
 
 const TaskBoard = () => {
-  const [tasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/worker/tasks");
+      if (res.ok) {
+        const data = await res.json();
+        setTasks(data.tasks || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch worker tasks", err);
+    }
+    setLoading(false);
+  };
+
+  const handleUpdateStatus = async (task) => {
+    let nextStatus = "";
+    if (task.status === "Pending") {
+      nextStatus = "In Progress";
+    } else if (task.status === "In Progress") {
+      nextStatus = "Completed";
+    } else {
+      return; // Already completed
+    }
+
+    try {
+      const res = await fetch(`/api/worker/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (res.ok) {
+        fetchTasks();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update task status");
+      }
+    } catch (err) {
+      console.error("Error updating task status", err);
+    }
+  };
 
   const columns = ["Pending", "In Progress", "Completed"];
 
@@ -71,9 +110,14 @@ const TaskBoard = () => {
                         <div key={i} className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white"></div>
                       ))}
                     </div>
-                    <button className="text-[#006a28] text-xs font-black uppercase tracking-widest hover:underline">
-                      Update
-                    </button>
+                    {task.status !== 'Completed' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(task)}
+                        className="text-[#006a28] text-xs font-black uppercase tracking-widest hover:underline"
+                      >
+                        Update
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

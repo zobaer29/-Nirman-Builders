@@ -1,92 +1,6 @@
-'use client';
-import { useState } from 'react';
+"use client";
 
-const projects = [
-  {
-    id: 1,
-    name: 'Emerald Heights – Wing B',
-    type: 'Residential',
-    phase: 'Structural Framework & Concreting',
-    status: 'In Progress',
-    progress: 68,
-    labor: 42,
-    deadline: 'Jun 15, 2025',
-    milestone: 'Slab Casting (Apr 28)',
-    budget: '₹4.2 Cr',
-    spent: '₹2.8 Cr',
-    color: 'primary',
-  },
-  {
-    id: 2,
-    name: 'Central Plaza Flooring',
-    type: 'Commercial',
-    phase: 'Marble Installation & Finishing',
-    status: 'Delayed',
-    progress: 15,
-    labor: 18,
-    deadline: 'May 01, 2025',
-    milestone: 'Material Shortage – Critical',
-    budget: '₹1.8 Cr',
-    spent: '₹0.9 Cr',
-    color: 'error',
-  },
-  {
-    id: 3,
-    name: 'Sector 14 Road Widening',
-    type: 'Infrastructure',
-    phase: 'Asphalt Laying & Road Marking',
-    status: 'On Schedule',
-    progress: 82,
-    labor: 30,
-    deadline: 'May 20, 2025',
-    milestone: 'Final Inspection (May 18)',
-    budget: '₹2.5 Cr',
-    spent: '₹2.1 Cr',
-    color: 'secondary',
-  },
-  {
-    id: 4,
-    name: 'Green Valley Villas – Block C',
-    type: 'Residential',
-    phase: 'Interior Plastering & Electrical',
-    status: 'In Progress',
-    progress: 53,
-    labor: 36,
-    deadline: 'Jul 30, 2025',
-    milestone: 'Wiring Inspection (May 5)',
-    budget: '₹3.6 Cr',
-    spent: '₹1.9 Cr',
-    color: 'primary',
-  },
-  {
-    id: 5,
-    name: 'Nirman Trade Centre',
-    type: 'Commercial',
-    phase: 'Glass Facade & Cladding',
-    status: 'In Progress',
-    progress: 40,
-    labor: 22,
-    deadline: 'Aug 10, 2025',
-    milestone: 'Glazing Sign-off (Jun 1)',
-    budget: '₹6.1 Cr',
-    spent: '₹2.4 Cr',
-    color: 'primary',
-  },
-  {
-    id: 6,
-    name: 'Airport Road Drainage',
-    type: 'Infrastructure',
-    phase: 'Pipe Laying & Backfilling',
-    status: 'On Schedule',
-    progress: 91,
-    labor: 14,
-    deadline: 'Apr 30, 2025',
-    milestone: 'Handover (Apr 30)',
-    budget: '₹0.9 Cr',
-    spent: '₹0.84 Cr',
-    color: 'secondary',
-  },
-];
+import { useState, useEffect } from 'react';
 
 const statusConfig = {
   'In Progress': { bg: 'bg-primary/10', text: 'text-[#006a28]', dot: 'bg-primary' },
@@ -101,8 +15,42 @@ const colorMap = {
 };
 
 export default function ContractorProjects() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('All');
   const filters = ['All', 'In Progress', 'Delayed', 'On Schedule'];
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/contractor/projects');
+        if (res.ok) {
+          const data = await res.json();
+          // Map backend projects to fields expected by this component
+          const mapped = (data.projects || []).map(p => ({
+            id: p.id,
+            name: p.name,
+            type: p.type,
+            phase: p.description || 'General Site Work',
+            status: p.status === 'Ongoing' ? 'In Progress' : p.status === 'Completed' ? 'On Schedule' : 'Delayed',
+            progress: p.progress || 0,
+            labor: p.labor || 0,
+            deadline: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'TBD',
+            milestone: 'Active Phase',
+            budget: p.budget,
+            spent: '—',
+            color: p.status === 'Ongoing' ? 'primary' : p.status === 'Completed' ? 'secondary' : 'error'
+          }));
+          setProjects(mapped);
+        }
+      } catch (err) {
+        console.error('Failed to fetch contractor projects', err);
+      }
+      setLoading(false);
+    };
+    fetchProjects();
+  }, []);
   const visible = filter === 'All' ? projects : projects.filter(p => p.status === filter);
 
   return (

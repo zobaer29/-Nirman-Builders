@@ -1,151 +1,241 @@
-import Image from "next/image";
-import Link from "next/link";
+"use client";
+
+import React, { useState, useEffect } from "react";
 
 export default function AdminProjects() {
+  const [projects, setProjects] = useState([]);
+  const [contractors, setContractors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedContractorId, setSelectedContractorId] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const projRes = await fetch("/api/admin/projects");
+      if (projRes.ok) {
+        const projData = await projRes.json();
+        setProjects(projData.projects || []);
+      }
+      const contRes = await fetch("/api/admin/contractors");
+      if (contRes.ok) {
+        const contData = await contRes.json();
+        setContractors(contData.contractors || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch admin projects data", error);
+    }
+    setLoading(false);
+  };
+
+  const handleReject = async (projectId) => {
+    if (!confirm("Are you sure you want to reject this project?")) return;
+    try {
+      const res = await fetch(`/api/admin/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reject" }),
+      });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to reject project");
+      }
+    } catch (error) {
+      console.error("Error rejecting project", error);
+    }
+  };
+
+  const openApproveModal = (project) => {
+    setSelectedProject(project);
+    setSelectedContractorId("");
+    setModalOpen(true);
+  };
+
+  const handleApprove = async () => {
+    if (!selectedContractorId) {
+      alert("Please select a contractor to assign to this project");
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/projects/${selectedProject.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "accept",
+          contractorId: Number(selectedContractorId),
+        }),
+      });
+      if (res.ok) {
+        setModalOpen(false);
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to approve project");
+      }
+    } catch (error) {
+      console.error("Error approving project", error);
+    }
+  };
+
+  const statusColor = (status) => {
+    switch (status) {
+      case "Ongoing":
+        return "bg-primary-container/20 text-primary-dim border-primary/20";
+      case "Completed":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "Rejected":
+        return "bg-rose-50 text-rose-700 border-rose-200";
+      case "Pending":
+      default:
+        return "bg-amber-50 text-amber-700 border-amber-200";
+    }
+  };
+
   return (
-    <>
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Page Header */}
-      <div className="mb-10 flex justify-between items-center">
+      <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-extrabold font-headline text-on-surface tracking-tight">
             Projects Repository
           </h2>
           <p className="text-on-surface-variant font-body mt-1">
-            Manage and monitor all construction projects.
+            Manage, approve, and assign contractors to client project requests.
           </p>
         </div>
-        <button className="bg-primary hover:bg-primary-dim text-white font-bold px-6 py-3 rounded-full flex items-center gap-2 shadow-lg transition-colors font-headline">
-          <span className="material-symbols-outlined">add</span> Create New Project
+        <button 
+          onClick={fetchData}
+          className="bg-primary hover:bg-primary-dim text-white font-bold px-6 py-3 rounded-full flex items-center gap-2 shadow-lg transition-colors font-headline"
+        >
+          <span className="material-symbols-outlined text-[18px]">refresh</span> Refresh
         </button>
       </div>
 
-      <div className="mb-10">
-        <h3 className="text-xl font-bold font-headline text-on-surface mb-6">Featured Projects</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col border border-gray-100">
-            <div className="relative h-48 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
-                alt="Skyline Business Tower"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
-                Commercial
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h4 className="text-xl font-bold font-headline text-on-surface mb-2">Skyline Business Tower</h4>
-              <p className="text-sm text-on-surface-variant mb-6 flex-1">
-                A 20-floor modern office tower with sustainable design, smart utility management, and premium workspace facilities.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-medium text-on-surface-variant border-t border-surface-container-highest pt-4">
-                <span className="material-symbols-outlined text-[16px]">location_on</span> Banani, Dhaka
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col border border-gray-100">
-            <div className="relative h-48 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=80"
-                alt="Greenview Residency"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute top-4 right-4 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
-                Residential
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h4 className="text-xl font-bold font-headline text-on-surface mb-2">Greenview Residency</h4>
-              <p className="text-sm text-on-surface-variant mb-6 flex-1">
-                A family-focused apartment complex featuring landscaped open spaces, rooftop amenities, and earthquake-resistant structure.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-medium text-on-surface-variant border-t border-surface-container-highest pt-4">
-                <span className="material-symbols-outlined text-[16px]">location_on</span> Uttara, Dhaka
-              </div>
-            </div>
-          </div>
+      {loading ? (
+        <div className="flex justify-center items-center py-24">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
-      </div>
-
-      <div>
-        <div className="flex justify-between items-end mb-6">
-          <h3 className="text-xl font-bold font-headline text-on-surface">All Projects</h3>
-          <div className="flex gap-2">
-            <button className="bg-surface-container-high hover:bg-surface-variant text-on-surface font-semibold px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">filter_list</span> Filter
-            </button>
-          </div>
+      ) : projects.length === 0 ? (
+        <div className="bg-white rounded-3xl p-16 text-center border border-gray-100 shadow-sm">
+          <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">folder_open</span>
+          <p className="text-on-surface-variant font-body">No projects have been requested yet.</p>
         </div>
-        
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-surface-container-lowest rounded-xl p-6 hover:shadow-md transition-all flex flex-col border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-bold text-lg font-headline text-on-surface">Metro Shopping Complex</h4>
-              <span className="px-3 py-1 bg-tertiary-container/20 text-tertiary text-[11px] font-bold rounded-full uppercase">Completed</span>
-            </div>
-            <p className="text-sm text-on-surface-variant mb-6 flex-1">
-              Retail & lifestyle mall with integrated parking and modern safety features.
-            </p>
-            <button className="text-primary font-semibold text-sm hover:underline self-start">View Details</button>
-          </div>
+          {projects.map((project) => (
+            <div 
+              key={project.id} 
+              className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex justify-between items-start mb-4 gap-2">
+                  <h4 className="font-extrabold text-lg text-[#06361f] tracking-tight">{project.name}</h4>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusColor(project.status)}`}>
+                    {project.status}
+                  </span>
+                </div>
+                <p className="text-sm text-on-surface-variant mb-6 line-clamp-3">
+                  {project.description || "No description provided."}
+                </p>
+                
+                <div className="space-y-3 border-t border-slate-50 pt-4 mb-6">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Client:</span>
+                    <span className="font-bold text-[#06361f]">{project.client}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Type:</span>
+                    <span className="font-bold text-[#06361f]">{project.type}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Budget:</span>
+                    <span className="font-bold text-[#006a28]">{project.budget}</span>
+                  </div>
+                  {project.location && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Location:</span>
+                      <span className="font-bold text-[#06361f]">{project.location}</span>
+                    </div>
+                  )}
+                  {project.contractor && (
+                    <div className="flex justify-between text-xs bg-[#f0fff4] p-2 rounded-xl">
+                      <span className="text-[#006a28] font-bold">Contractor:</span>
+                      <span className="font-bold text-[#006a28]">{project.contractor}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          <div className="bg-surface-container-lowest rounded-xl p-6 hover:shadow-md transition-all flex flex-col border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-bold text-lg font-headline text-on-surface">Riverfront Villas</h4>
-              <span className="px-3 py-1 bg-primary-container/20 text-primary-dim text-[11px] font-bold rounded-full uppercase">Ongoing</span>
+              {project.status === "Pending" && (
+                <div className="flex gap-3 mt-auto pt-2">
+                  <button 
+                    onClick={() => openApproveModal(project)}
+                    className="flex-1 py-3 bg-[#006a28] hover:bg-[#005c22] text-white rounded-xl text-xs font-black uppercase tracking-widest transition-colors shadow-sm"
+                  >
+                    Approve
+                  </button>
+                  <button 
+                    onClick={() => handleReject(project.id)}
+                    className="flex-1 py-3 bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
             </div>
-            <p className="text-sm text-on-surface-variant mb-6 flex-1">
-              Luxury gated community project with modern duplex villas and clubhouse.
-            </p>
-            <button className="text-primary font-semibold text-sm hover:underline self-start">View Details</button>
-          </div>
+          ))}
+        </div>
+      )}
 
-          <div className="bg-surface-container-lowest rounded-xl p-6 hover:shadow-md transition-all flex flex-col border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-bold text-lg font-headline text-on-surface">Tech Park Phase II</h4>
-              <span className="px-3 py-1 bg-tertiary-container/20 text-tertiary text-[11px] font-bold rounded-full uppercase">Completed</span>
-            </div>
-            <p className="text-sm text-on-surface-variant mb-6 flex-1">
-              Industrial and innovation campus with advanced utility infrastructure.
+      {/* Approve Modal */}
+      {modalOpen && selectedProject && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl border border-slate-100 mx-4">
+            <h3 className="text-2xl font-black text-[#06361f] tracking-tight mb-4">Assign Contractor</h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Select a qualified contractor to take charge of <strong>{selectedProject.name}</strong>.
             </p>
-            <button className="text-primary font-semibold text-sm hover:underline self-start">View Details</button>
-          </div>
 
-          <div className="bg-surface-container-lowest rounded-xl p-6 hover:shadow-md transition-all flex flex-col border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-bold text-lg font-headline text-on-surface">City Medical Center</h4>
-              <span className="px-3 py-1 bg-primary-container/20 text-primary-dim text-[11px] font-bold rounded-full uppercase">Ongoing</span>
+            <div className="space-y-4 mb-8">
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-400">Available Contractors</label>
+              <select 
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-4 text-sm font-bold text-[#06361f] focus:ring-4 focus:ring-[#006a28]/5 outline-none"
+                value={selectedContractorId}
+                onChange={(e) => setSelectedContractorId(e.target.value)}
+              >
+                <option value="">-- Choose Contractor --</option>
+                {contractors.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.full_name || c.username} ({c.specialization || "General Builders"})
+                  </option>
+                ))}
+              </select>
             </div>
-            <p className="text-sm text-on-surface-variant mb-6 flex-1">
-              Multi-specialty hospital project meeting modern healthcare design standards.
-            </p>
-            <button className="text-primary font-semibold text-sm hover:underline self-start">View Details</button>
-          </div>
 
-          <div className="bg-surface-container-lowest rounded-xl p-6 hover:shadow-md transition-all flex flex-col border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-bold text-lg font-headline text-on-surface">Lakeside Corporate Hub</h4>
-              <span className="px-3 py-1 bg-tertiary-container/20 text-tertiary text-[11px] font-bold rounded-full uppercase">Completed</span>
+            <div className="flex gap-4">
+              <button 
+                onClick={handleApprove}
+                className="flex-1 py-4 bg-[#006a28] hover:bg-[#005c22] text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-colors shadow-lg shadow-[#006a28]/10"
+              >
+                Confirm Assign
+              </button>
+              <button 
+                onClick={() => setModalOpen(false)}
+                className="flex-1 py-4 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-2xl text-xs font-black uppercase tracking-widest transition-colors"
+              >
+                Cancel
+              </button>
             </div>
-            <p className="text-sm text-on-surface-variant mb-6 flex-1">
-              Grade-A office spaces built for scalable businesses and startups.
-            </p>
-            <button className="text-primary font-semibold text-sm hover:underline self-start">View Details</button>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl p-6 hover:shadow-md transition-all flex flex-col border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-bold text-lg font-headline text-on-surface">Airport Link Residences</h4>
-              <span className="px-3 py-1 bg-primary-container/20 text-primary-dim text-[11px] font-bold rounded-full uppercase">Ongoing</span>
-            </div>
-            <p className="text-sm text-on-surface-variant mb-6 flex-1">
-              Transit-friendly high-rise residences with smart security and green zones.
-            </p>
-            <button className="text-primary font-semibold text-sm hover:underline self-start">View Details</button>
           </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }

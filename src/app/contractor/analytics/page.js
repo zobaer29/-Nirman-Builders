@@ -1,39 +1,5 @@
 'use client';
-import { useState } from 'react';
-
-const weeklyData = [
-  { day: 'Mon', tasks: 14, hours: 68 },
-  { day: 'Tue', tasks: 18, hours: 72 },
-  { day: 'Wed', tasks: 12, hours: 65 },
-  { day: 'Thu', tasks: 20, hours: 80 },
-  { day: 'Fri', tasks: 17, hours: 75 },
-  { day: 'Sat', tasks: 9,  hours: 42 },
-  { day: 'Sun', tasks: 3,  hours: 15 },
-];
-
-const projectHealth = [
-  { name: 'Emerald Heights', progress: 68, onTime: true,  risk: 'Low'    },
-  { name: 'Central Plaza',   progress: 15, onTime: false, risk: 'High'   },
-  { name: 'Sector 14 Road',  progress: 82, onTime: true,  risk: 'Low'    },
-  { name: 'Green Valley',    progress: 53, onTime: true,  risk: 'Medium' },
-  { name: 'Nirman Trade',    progress: 40, onTime: true,  risk: 'Low'    },
-  { name: 'Airport Road',    progress: 91, onTime: true,  risk: 'Low'    },
-];
-
-const kpis = [
-  { label: 'Total Projects',      value: '6',     sub: 'All active',          icon: 'architecture',      bg: 'bg-primary/10', color: 'text-primary'  },
-  { label: 'Workflow Efficiency', value: '94.2%', sub: '+2.1% vs last month', icon: 'bolt',              bg: 'bg-primary/10', color: 'text-[#006a28]'},
-  { label: 'Budget Utilization',  value: '61%',   sub: 'Within target',       icon: 'payments',          bg: 'bg-blue-50',    color: 'text-blue-600' },
-  { label: 'Tasks Completed',     value: '93',    sub: 'This week',           icon: 'task_alt',          bg: 'bg-purple-50',  color: 'text-purple-600'},
-  { label: 'Safety Incidents',    value: '0',     sub: '32-day streak',       icon: 'health_and_safety', bg: 'bg-primary/10', color: 'text-[#006a28]'},
-  { label: 'Delayed Projects',    value: '1',     sub: 'Central Plaza',       icon: 'warning',           bg: 'bg-red-50',     color: 'text-red-500'  },
-];
-
-const efficiencyRings = [
-  { label: 'Schedule Adherence', value: 92, stroke: '#16a34a' },
-  { label: 'Material Usage',     value: 87, stroke: '#60a5fa' },
-  { label: 'Labour Productivity',value: 94, stroke: '#a78bfa' },
-];
+import { useState, useEffect } from 'react';
 
 const riskBadge = {
   Low:    'bg-primary/10 text-[#006a28]',
@@ -43,8 +9,27 @@ const riskBadge = {
 
 export default function ContractorAnalytics() {
   const [metric, setMetric] = useState('tasks');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const maxVal = Math.max(...weeklyData.map(d => d[metric]));
+  // Fetch real data
+  useEffect(() => {
+    fetch('/api/contractor/analytics')
+      .then(res => res.json())
+      .then(d => { setData(d); setLoading(false); })
+      .catch(err => { console.error(err); setLoading(false); });
+  }, []);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
+  }
+
+  if (!data || data.error) {
+    return <div className="p-10 text-center text-red-500">Failed to load analytics data.</div>;
+  }
+
+  const { weeklyData, projectHealth, kpis, efficiencyRings } = data;
+  const maxVal = Math.max(...(weeklyData || []).map(d => d[metric] || 0), 1);
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
