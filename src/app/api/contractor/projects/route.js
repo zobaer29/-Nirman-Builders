@@ -26,7 +26,7 @@ export async function GET(request) {
         u_client.email as client_email,
         (SELECT COUNT(*) FROM project_workers pw WHERE pw.project_id = p.id AND pw.status = 'Active') as active_labor
       FROM projects p
-      JOIN users u_client ON p.user_id = u_client.id
+      LEFT JOIN users u_client ON p.user_id = u_client.id
       WHERE p.contractor_id = ?
       ORDER BY p.created_at DESC
     `, [payload.userId]);

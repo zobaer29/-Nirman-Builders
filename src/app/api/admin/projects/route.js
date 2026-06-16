@@ -28,7 +28,7 @@ export async function GET(request) {
         u_contractor.email as contractor_email,
         r.full_name as contractor_full_name
       FROM projects p
-      JOIN users u_client ON p.user_id = u_client.id
+      LEFT JOIN users u_client ON p.user_id = u_client.id
       LEFT JOIN users u_contractor ON p.contractor_id = u_contractor.id
       LEFT JOIN (
         SELECT r1.*

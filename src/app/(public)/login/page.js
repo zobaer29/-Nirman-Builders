@@ -6,7 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
 
-export default function Login() {
+import { Suspense } from 'react';
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -197,5 +199,13 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -31,22 +31,46 @@ const Tasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/user/tasks");
-        if (res.ok) {
-          const data = await res.json();
-          setTasks(data.tasks || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user tasks", err);
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/user/tasks");
+      if (res.ok) {
+        const data = await res.json();
+        setTasks(data.tasks || []);
       }
-      setLoading(false);
-    };
-    fetchTasks();
+    } catch (err) {
+      console.error("Failed to fetch user tasks", err);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchTasks();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
+
+  const handleUpdateStatus = async (task, resultValue = null) => {
+    let nextStatus = "Completed"; // Accept/Reject automatically completes the verification task
+
+    try {
+      const res = await fetch(`/api/worker/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus, result: resultValue }),
+      });
+      if (res.ok) {
+        fetchTasks();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update task status");
+      }
+    } catch (err) {
+      console.error("Error updating task status", err);
+    }
+  };
 
   const getProgress = (status) => {
     if (status === "Completed") return 100;
@@ -147,6 +171,28 @@ const Tasks = () => {
                   <span className="text-slate-400">Assigned To:</span>
                   <span className="font-bold text-[#06361f]">{task.worker}</span>
                 </div>
+
+                {task.status !== "Completed" && (task.title.startsWith("Verify Order:") || task.title.startsWith("Receive:")) && (
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-4 mb-4">
+                    <span className="text-xs text-slate-400 font-medium">Resolution:</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStatus(task, "Accepted")}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStatus(task, "Rejected")}
+                        className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Progress */}

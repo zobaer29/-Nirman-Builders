@@ -117,12 +117,84 @@ export async function ensureProjectsTable(pool) {
       status VARCHAR(50) NOT NULL DEFAULT 'Pending',
       priority VARCHAR(20) NOT NULL DEFAULT 'Medium',
       due_date VARCHAR(100) NULL,
+      material_request_id INT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX idx_tasks_project_id (project_id),
-      INDEX idx_tasks_worker_id (worker_id)
+      INDEX idx_tasks_worker_id (worker_id),
+      INDEX idx_tasks_material_request_id (material_request_id)
     )
   `);
+
+  // Ensure tasks material_request_id column upgrade
+  try {
+    const [tasksCols] = await pool.query(`
+      SHOW COLUMNS FROM tasks LIKE 'material_request_id'
+    `);
+    if (tasksCols.length === 0) {
+      await pool.query(`
+        ALTER TABLE tasks 
+        ADD COLUMN material_request_id INT NULL,
+        ADD INDEX idx_tasks_material_request_id (material_request_id)
+      `);
+    }
+  } catch (error) {
+    console.error("Error upgrading tasks table for material_request_id:", error);
+  }
+
+  // 4. Ensure material_requests table exists
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS material_requests (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      project_id INT NOT NULL,
+      worker_id INT NOT NULL,
+      material_name VARCHAR(255) NOT NULL,
+      quantity DECIMAL(10, 2) NOT NULL,
+      unit VARCHAR(50) NOT NULL,
+      urgency VARCHAR(50) NOT NULL DEFAULT 'Normal (End of Day)',
+      reason TEXT NULL,
+      status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_material_requests_project_id (project_id),
+      INDEX idx_material_requests_worker_id (worker_id)
+    )
+  `);
+
+  // 5. Ensure materials table exists
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS materials (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      category VARCHAR(100) NOT NULL,
+      stock INT NOT NULL DEFAULT 0,
+      unit VARCHAR(50) NOT NULL,
+      threshold INT NOT NULL DEFAULT 0,
+      site VARCHAR(255) NULL,
+      status VARCHAR(50) NOT NULL DEFAULT 'OK',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Seed default materials if empty
+  const [mCount] = await pool.query('SELECT COUNT(*) as count FROM materials');
+  if (mCount[0].count === 0) {
+    const defaultMats = [
+      ['Portland Cement (OPC 53)', 'Cement', 340, 'Bags', 200, 'Emerald Heights', 'OK'],
+      ['TMT Rebar – Fe 500D', 'Steel', 18, 'MT', 25, 'Central Plaza', 'Low'],
+      ['Marble Tiles (Italian White)', 'Finishing', 0, 'Sq.ft', 500, 'Central Plaza', 'Out'],
+      ['River Sand (M Sand)', 'Aggregate', 620, 'Cu.ft', 300, 'Sector 14', 'OK'],
+      ['Ready Mix Concrete M30', 'Concrete', 45, 'Cu.m', 30, 'Green Valley', 'OK'],
+      ['Electrical Conduit Pipes', 'Electrical', 80, 'Pcs', 150, 'Green Valley', 'Low'],
+    ];
+    for (const mat of defaultMats) {
+      await pool.query(
+        'INSERT INTO materials (name, category, stock, unit, threshold, site, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        mat
+      );
+    }
+  }
 }
 
 export function mapProjectRow(row, clientName, contractorName) {
@@ -141,4 +213,44 @@ export function mapProjectRow(row, clientName, contractorName) {
     description: row.description,
     createdAt: row.created_at,
   };
+}
+
+export async function updateMaterialStock(pool, materialName, quantity, siteName) {
+  let queryName = materialName;
+  if (materialName.includes('Cement')) {
+    queryName = 'Portland Cement (OPC 53)';
+  } else if (materialName.includes('Steel') || materialName.includes('Rebar')) {
+    queryName = 'TMT Rebar – Fe 500D';
+  } else if (materialName.includes('Marble') || materialName.includes('Tiles')) {
+    queryName = 'Marble Tiles (Italian White)';
+  } else if (materialName.includes('Sand')) {
+    queryName = 'River Sand (M Sand)';
+  } else if (materialName.includes('Concrete')) {
+    queryName = 'Ready Mix Concrete M30';
+  } else if (materialName.includes('Conduit') || materialName.includes('Pipe')) {
+    queryName = 'Electrical Conduit Pipes';
+  }
+
+  // Find if a material with this name exists in the database
+  const [mats] = await pool.query(
+    'SELECT id, stock, threshold FROM materials WHERE name = ?',
+    [queryName]
+  );
+
+  if (mats.length > 0) {
+    const newStock = Number(mats[0].stock) + Number(quantity);
+    const threshold = Number(mats[0].threshold);
+    const newStatus = newStock === 0 ? 'Out' : (newStock < threshold ? 'Low' : 'OK');
+    
+    await pool.query(
+      'UPDATE materials SET stock = ?, status = ? WHERE id = ?',
+      [newStock, newStatus, mats[0].id]
+    );
+  } else {
+    // If it doesn't exist, create it!
+    await pool.query(
+      'INSERT INTO materials (name, category, stock, unit, threshold, site, status) VALUES (?, ?, ?, ?, 10, ?, "OK")',
+      [materialName, 'General', Number(quantity), 'Pcs', siteName]
+    );
+  }
 }

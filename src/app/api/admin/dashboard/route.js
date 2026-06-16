@@ -28,7 +28,7 @@ export async function GET(request) {
     const [recentRequests] = await pool.query(`
       SELECT p.*, u.username as client_name
       FROM projects p
-      JOIN users u ON p.user_id = u.id
+      LEFT JOIN users u ON p.user_id = u.id
       ORDER BY p.created_at DESC
       LIMIT 5
     `);

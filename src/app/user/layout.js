@@ -10,18 +10,35 @@ const sidebaritems = [
   { label: "Projects", href: "/user/projects", icon: "architecture" },
   { label: "Tasks", href: "/user/tasks", icon: "assignment" },
   { label: "Messages", href: "/user/chat", icon: "chat" },
-  { label: "Requests", href: "/user/requests", icon: "assignment_returned" }
+  { label: "Requests", href: "/user/requests", icon: "assignment_returned" },
+  { label: "Profile", href: "/user/profile", icon: "person" }
 ];
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     if (window.innerWidth >= 768) {
       setIsSidebarOpen(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/profile");
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data.user);
+        }
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+      }
+    };
+    fetchProfile();
   }, []);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -148,13 +165,15 @@ export default function ClientLayout({ children }) {
 
               <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
                 <div className="text-right hidden sm:block">
-                  <p className="text-xs font-black text-[#06361f]">Rahim Uddin</p>
-                  <p className="text-[10px] font-bold text-[#548064] uppercase tracking-widest">Premium Owner</p>
+                  <p className="text-xs font-black text-[#06361f]">{profile ? profile.username : 'Loading...'}</p>
+                  <p className="text-[10px] font-bold text-[#548064] uppercase tracking-widest">
+                    {profile ? 'Property Owner' : 'Owner'}
+                  </p>
                 </div>
                 <img
                   className="w-12 h-12 rounded-2xl object-cover border-2 border-[#006a28]/10 shadow-md"
                   alt="user"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX5NT86IkP7CGz2_PvuqsegQojw1qrphEbDW8mCi3GICpx55gWfkZt7Y7bLTVl-UyC71qB3T_-6bgf9khuR9pFmHUxVZOKwqcepLOqEDO80KckqYy6UZepImHKEJU9oLmWrwlDlqI0JSRAsyjKfed3bG92SWJ5UaC9E_4kC_eQ-uhGg0F2AlMnm-vWvfGCvFFXglIMiriRXAkK-AP8x0rs6sK2qoNHHQR10EfTPbo3oq2Gcg1KFNZM3HwJkaKQwoKbFq1mOnxiBzI"
+                  src={profile?.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop"}
                 />
               </div>
             </div>

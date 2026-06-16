@@ -25,7 +25,7 @@ export async function GET(request) {
         pw.role_on_site,
         pw.status as worker_site_status,
         u_contractor.username as contractor_username,
-        r_contractor.full_name as contractor_full_name
+        r.full_name as contractor_full_name
       FROM projects p
       JOIN project_workers pw ON p.id = pw.project_id
       LEFT JOIN users u_contractor ON p.contractor_id = u_contractor.id

@@ -72,7 +72,7 @@ const WorkerChat = () => {
             <div className="flex gap-4">
               <div className="w-10 h-10 rounded-2xl bg-slate-200 self-end shadow-md"></div>
               <div className="bg-white border border-slate-100 p-6 rounded-3xl rounded-tl-none max-w-[70%] shadow-sm">
-                <p className="text-sm font-medium text-[#06361f] leading-relaxed">Yes, Arjun. Please stage them there. I'll be coming up in 20 minutes to review the installation plan.</p>
+                <p className="text-sm font-medium text-[#06361f] leading-relaxed">Yes, Arjun. Please stage them there. I&apos;ll be coming up in 20 minutes to review the installation plan.</p>
                 <p className="text-[9px] text-[#548064] mt-3 font-black">09:45 AM</p>
               </div>
             </div>

@@ -11,16 +11,33 @@ const navItems = [
   { label: "Task Board", href: "/worker/tasks", icon: "assignment" },
   { label: "Material Request", href: "/worker/inventory", icon: "inventory_2" },
   { label: "Communication", href: "/worker/chat", icon: "chat" },
+  { label: "Profile", href: "/worker/profile", icon: "person" },
 ];
 
 export default function WorkerLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/profile");
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("Error fetching worker profile:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     if (window.innerWidth >= 768) {
-      setIsSidebarOpen(true);
+      setTimeout(() => setIsSidebarOpen(true), 0);
     }
   }, []);
 
@@ -149,14 +166,14 @@ export default function WorkerLayout({ children }) {
 
               <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
                 <div className="text-right hidden sm:block">
-                  <p className="text-xs font-black text-[#06361f]">Arjun Kumar</p>
-                  <p className="text-[10px] font-bold text-[#548064] uppercase tracking-widest">Senior Technician</p>
+                  <p className="text-xs font-black text-[#06361f]">{profile?.details?.full_name || profile?.user?.username || "Loading..."}</p>
+                  <p className="text-[10px] font-bold text-[#548064] uppercase tracking-widest">{profile?.details?.specialization || "Field Worker"}</p>
                 </div>
                 <div className="relative">
                   <img
                     className="w-12 h-12 rounded-2xl object-cover border-2 border-[#006a28]/10 shadow-md"
                     alt="user"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX5NT86IkP7CGz2_PvuqsegQojw1qrphEbDW8mCi3GICpx55gWfkZt7Y7bLTVl-UyC71qB3T_-6bgf9khuR9pFmHUxVZOKwqcepLOqEDO80KckqYy6UZepImHKEJU9oLmWrwlDlqI0JSRAsyjKfed3bG92SWJ5UaC9E_4kC_eQ-uhGg0F2AlMnm-vWvfGCvFFXglIMiriRXAkK-AP8x0rs6sK2qoNHHQR10EfTPbo3oq2Gcg1KFNZM3HwJkaKQwoKbFq1mOnxiBzI"
+                    src={profile?.user?.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop"}
                   />
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#4bee74] border-2 border-white rounded-full shadow-sm"></div>
                 </div>
