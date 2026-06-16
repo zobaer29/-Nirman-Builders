@@ -1,31 +1,161 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    photoUrl: "",
+  });
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('/api/auth/profile');
+        const res = await fetch("/api/auth/profile");
         if (res.ok) {
           const data = await res.json();
           setProfile(data.user);
+          setFormData({
+            username: data.user.username || "",
+            email: data.user.email || "",
+            photoUrl: data.user.photoUrl || "",
+          });
         } else {
-          router.push('/login');
+          router.push("/login");
         }
       } catch (error) {
-        console.error('Failed to load profile', error);
+        console.error("Failed to load profile", error);
       } finally {
         setLoading(false);
       }
     };
     fetchProfile();
   }, [router]);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  function startEditing() {
+    setMessage("");
+    setError("");
+    setEditing(true);
+  }
+
+  function cancelEditing() {
+    setFormData({
+      username: profile.username || "",
+      email: profile.email || "",
+      photoUrl: profile.photoUrl || "",
+    });
+    setMessage("");
+    setError("");
+    setEditing(false);
+  }
+
+  async function saveProfile() {
+    const username = formData.username.trim();
+    const email = formData.email.trim();
+    const photoUrl = formData.photoUrl.trim();
+
+    if (!username || !email) {
+      setError("Name and email are required.");
+      setMessage("");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+      setMessage("");
+
+      const res = await fetch("/api/auth/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          photoUrl,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update profile");
+      }
+
+      setProfile((current) => ({
+        ...current,
+        username,
+        email,
+        photoUrl,
+      }));
+      setEditing(false);
+      setMessage("Profile updated successfully.");
+    } catch (err) {
+      setError(err.message || "Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function uploadPhoto(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      setMessage("");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError("");
+      setMessage("");
+
+      const uploadData = new FormData();
+      uploadData.append("image", file);
+
+      const res = await fetch("/api/upload/image", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload photo");
+      }
+
+      setFormData((current) => ({
+        ...current,
+        photoUrl: data.url,
+      }));
+      setMessage("Photo uploaded. Click Save Changes to update your profile.");
+    } catch (err) {
+      setError(err.message || "Failed to upload photo.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -37,7 +167,16 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
-  const roleName = profile.roleId === 1 ? 'Super Admin' : profile.roleId === 2 ? 'User' : profile.roleId === 3 ? 'Contractor' : 'Worker';
+  const roleName =
+    profile.roleId === 1
+      ? "Super Admin"
+      : profile.roleId === 2
+        ? "User"
+        : profile.roleId === 3
+          ? "Contractor"
+          : "Worker";
+  const previewPhotoUrl = editing ? formData.photoUrl.trim() : profile.photoUrl;
+  const previewName = editing ? formData.username.trim() : profile.username;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -53,66 +192,187 @@ export default function ProfilePage() {
         <div className="h-48 bg-gradient-to-r from-emerald-500 to-teal-400 w-full relative">
           <div className="absolute inset-0 bg-black/10"></div>
         </div>
-        
+
         {/* Profile Info */}
         <div className="px-8 pb-10 relative">
           <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end -mt-16 mb-8 relative z-10">
-            {profile.photoUrl ? (
-              <img 
-                src={profile.photoUrl} 
-                alt="Profile" 
+            {previewPhotoUrl ? (
+              <img
+                src={previewPhotoUrl}
+                alt="Profile"
                 className="w-32 h-32 rounded-2xl object-cover border-4 border-white shadow-xl bg-white"
                 referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-32 h-32 rounded-2xl border-4 border-white shadow-xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-5xl">
-                {profile.username.charAt(0).toUpperCase()}
+                {(previewName || "A").charAt(0).toUpperCase()}
               </div>
             )}
-            
+
             <div className="flex-1 pb-2">
-              <h2 className="text-2xl font-bold text-slate-800">{profile.username}</h2>
+              <h2 className="text-2xl font-bold text-slate-800">
+                {previewName || profile.username}
+              </h2>
               <p className="text-slate-500 font-medium">{roleName}</p>
             </div>
-            
+
             <div className="pb-2 flex gap-3">
-              <button className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors">
-                Edit Profile
-              </button>
-              <button className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-sm shadow-emerald-500/20">
-                Save Changes
-              </button>
+              {editing ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    disabled={saving}
+                    className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveProfile}
+                    disabled={saving || uploading}
+                    className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-sm shadow-emerald-500/20 disabled:opacity-60"
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={startEditing}
+                  className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors"
+                >
+                  Edit Profile
+                </button>
+              )}
             </div>
           </div>
 
+          {message && (
+            <div className="mb-6 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              {message}
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-6 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Personal Information</h3>
-              
+              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
+                Personal Information
+              </h3>
+
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-500">Full Name</label>
-                  <p className="text-slate-800 font-medium mt-1">{profile.username}</p>
+                  <label className="text-sm font-medium text-slate-500">
+                    Full Name
+                  </label>
+                  {editing ? (
+                    <input
+                      name="username"
+                      type="text"
+                      value={formData.username}
+                      onChange={handleChange}
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                  ) : (
+                    <p className="text-slate-800 font-medium mt-1">
+                      {profile.username}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-500">Email Address</label>
-                  <p className="text-slate-800 font-medium mt-1">{profile.email}</p>
+                  <label className="text-sm font-medium text-slate-500">
+                    Email Address
+                  </label>
+                  {editing ? (
+                    <input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                  ) : (
+                    <p className="text-slate-800 font-medium mt-1">
+                      {profile.email}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-500">Account ID</label>
+                  <label className="text-sm font-medium text-slate-500">
+                    Photo URL
+                  </label>
+                  {editing ? (
+                    <div className="mt-2 space-y-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-500/20 transition-colors hover:bg-emerald-600">
+                          <span className="material-symbols-outlined text-[20px]">
+                            upload
+                          </span>
+                          {uploading ? "Uploading..." : "Upload Photo"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={uploadPhoto}
+                            disabled={uploading}
+                            className="hidden"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((current) => ({
+                              ...current,
+                              photoUrl: "",
+                            }))
+                          }
+                          disabled={uploading || !formData.photoUrl}
+                          className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <input
+                        name="photoUrl"
+                        type="url"
+                        value={formData.photoUrl}
+                        onChange={handleChange}
+                        placeholder="Uploaded image URL will appear here"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-slate-800 font-medium mt-1 break-all">
+                      {profile.photoUrl || "Not set"}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-500">
+                    Account ID
+                  </label>
                   <p className="text-slate-800 font-mono text-sm mt-1 bg-slate-50 p-2 rounded-lg inline-block border border-slate-100">
-                    USR-{profile.id.toString().padStart(5, '0')}
+                    USR-{profile.id.toString().padStart(5, "0")}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">System Details</h3>
-              
+              <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">
+                System Details
+              </h3>
+
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-500">Role</label>
+                  <label className="text-sm font-medium text-slate-500">
+                    Role
+                  </label>
                   <div className="mt-2">
                     <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium border border-emerald-200">
                       {roleName}
@@ -120,16 +380,22 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-500">Status</label>
+                  <label className="text-sm font-medium text-slate-500">
+                    Status
+                  </label>
                   <div className="mt-2 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span className="text-slate-800 font-medium">Active</span>
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-500">Authentication</label>
+                  <label className="text-sm font-medium text-slate-500">
+                    Authentication
+                  </label>
                   <p className="text-slate-800 font-medium mt-1">
-                    {profile?.photoUrl ? 'Google OAuth (Firebase)' : 'Native Credentials (MySQL)'}
+                    {profile?.photoUrl
+                      ? "Google OAuth (Firebase)"
+                      : "Native Credentials (MySQL)"}
                   </p>
                 </div>
               </div>

@@ -46,7 +46,8 @@ function formatTime(value) {
 }
 
 function Avatar({ contact, size = "md" }) {
-  const sizeClass = size === "sm" ? "w-9 h-9 rounded-xl" : "w-12 h-12 rounded-2xl";
+  const sizeClass =
+    size === "sm" ? "w-9 h-9 rounded-xl" : "w-12 h-12 rounded-2xl";
 
   if (contact?.avatar) {
     return (
@@ -82,7 +83,7 @@ export default function DashboardChat({ variant = "user" }) {
   const listRef = useRef(null);
 
   const activeConversation = conversations.find(
-    (conversation) => Number(conversation.conversationId) === Number(activeId)
+    (conversation) => Number(conversation.conversationId) === Number(activeId),
   );
 
   const filteredConversations = useMemo(() => {
@@ -93,7 +94,7 @@ export default function DashboardChat({ variant = "user" }) {
       [conversation.name, conversation.role, conversation.lastMessage]
         .join(" ")
         .toLowerCase()
-        .includes(query)
+        .includes(query),
     );
   }, [conversations, search]);
 
@@ -107,7 +108,10 @@ export default function DashboardChat({ variant = "user" }) {
 
       setConversations(data.conversations || []);
       setActiveId((current) => {
-        if (current && data.conversations?.some((item) => item.conversationId === current)) {
+        if (
+          current &&
+          data.conversations?.some((item) => item.conversationId === current)
+        ) {
           return current;
         }
         return data.conversations?.[0]?.conversationId || null;
@@ -234,7 +238,8 @@ export default function DashboardChat({ variant = "user" }) {
           )}
 
           {filteredConversations.map((conversation) => {
-            const active = Number(activeId) === Number(conversation.conversationId);
+            const active =
+              Number(activeId) === Number(conversation.conversationId);
 
             return (
               <button
@@ -313,20 +318,6 @@ export default function DashboardChat({ variant = "user" }) {
                   </p>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                {["call", "videocam", "more_horiz"].map((icon) => (
-                  <button
-                    key={icon}
-                    type="button"
-                    className="w-12 h-12 flex items-center justify-center rounded-2xl transition-all active:scale-90 text-[#006a28] bg-[#f0fff4]"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">
-                      {icon}
-                    </span>
-                  </button>
-                ))}
-              </div>
             </header>
 
             {error && (
@@ -401,11 +392,7 @@ export default function DashboardChat({ variant = "user" }) {
                 <button
                   type="button"
                   className="w-12 h-12 text-[#548064] hover:text-[#006a28] hover:bg-[#f0fff4] transition-all rounded-full shrink-0 flex items-center justify-center"
-                >
-                  <span className="material-symbols-outlined text-[24px]">
-                    add_circle
-                  </span>
-                </button>
+                ></button>
 
                 <textarea
                   value={input}
@@ -438,7 +425,9 @@ export default function DashboardChat({ variant = "user" }) {
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center max-w-md">
               <div className="mx-auto w-16 h-16 rounded-2xl bg-[#f0fff4] text-[#006a28] flex items-center justify-center mb-5">
-                <span className="material-symbols-outlined text-3xl">forum</span>
+                <span className="material-symbols-outlined text-3xl">
+                  forum
+                </span>
               </div>
               <h3 className="text-xl font-black text-[#06361f] mb-2">
                 No active chats

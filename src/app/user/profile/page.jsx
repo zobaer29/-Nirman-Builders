@@ -10,6 +10,7 @@ export default function ClientProfilePage() {
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [notification, setNotification] = useState({ message: "", type: "" });
 
   const [formData, setFormData] = useState({
@@ -83,6 +84,40 @@ export default function ClientProfilePage() {
     }
   };
 
+  const uploadPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose an image file.", "error");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const uploadData = new FormData();
+      uploadData.append("image", file);
+
+      const res = await fetch("/api/upload/image", {
+        method: "POST",
+        body: uploadData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload photo");
+      }
+
+      setFormData((current) => ({ ...current, photoUrl: data.url }));
+      showToast("Photo uploaded. Save details to update your profile.");
+    } catch (err) {
+      showToast(err.message || "Failed to upload photo", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -106,6 +141,10 @@ export default function ClientProfilePage() {
   }
 
   if (!profile) return null;
+  const previewPhotoUrl = isEditing ? formData.photoUrl : profile.user.photoUrl;
+  const previewName = isEditing
+    ? formData.fullName || formData.username
+    : profile.details?.full_name || profile.user.username;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl mx-auto relative pb-12">
@@ -151,22 +190,22 @@ export default function ClientProfilePage() {
 
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end -mt-12 mb-8 relative z-10">
-            {profile.user.photoUrl ? (
+            {previewPhotoUrl ? (
               <img 
-                src={profile.user.photoUrl} 
+                src={previewPhotoUrl} 
                 alt="Profile Avatar" 
                 className="w-28 h-28 rounded-[24px] object-cover border-4 border-white shadow-xl bg-white"
                 referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-28 h-28 rounded-[24px] border-4 border-white shadow-xl bg-[#006a28]/10 flex items-center justify-center text-[#006a28] font-black text-4xl bg-white">
-                {profile.user.username.charAt(0).toUpperCase()}
+                {(previewName || "U").charAt(0).toUpperCase()}
               </div>
             )}
             
             <div className="flex-1 min-w-0">
               <h2 className="text-2xl font-black text-[#06361f] truncate">
-                {formData.fullName || profile.user.username}
+                {previewName}
               </h2>
               <p className="text-[#548064] text-xs font-black uppercase tracking-wider mt-0.5">
                 Property Owner
@@ -212,13 +251,34 @@ export default function ClientProfilePage() {
                     />
                   </div>
 
-                  {/* Photo URL */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-[#548064] uppercase tracking-wider">Avatar Image URL</label>
+                    <label className="text-[10px] font-black text-[#548064] uppercase tracking-wider">Profile Photo</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#006a28] px-4 py-3 text-sm font-black text-white shadow-lg shadow-[#006a28]/20 hover:bg-[#005a22] transition-colors">
+                        <span className="material-symbols-outlined text-lg">upload</span>
+                        {uploading ? "Uploading..." : "Upload Photo"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={uploadPhoto}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        disabled={uploading || !formData.photoUrl}
+                        onClick={() => setFormData({ ...formData, photoUrl: "" })}
+                        className="px-4 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl font-black text-sm transition-colors disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={formData.photoUrl}
                       onChange={e => setFormData({ ...formData, photoUrl: e.target.value })}
+                      placeholder="Uploaded image URL"
                       className="w-full bg-[#f4f7f6] outline-none border border-zinc-200 rounded-xl p-3 text-sm focus:border-[#006a28] font-bold text-[#06361f]"
                     />
                   </div>
@@ -265,14 +325,17 @@ export default function ClientProfilePage() {
               <div className="flex gap-3 pt-4 justify-end">
                 <button
                   type="button"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    fetchProfile();
+                  }}
                   className="px-6 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-2xl font-black text-sm uppercase tracking-wider transition-all border-none cursor-pointer outline-none"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || uploading}
                   className="bg-[#006a28] text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-[#006a28]/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center gap-2 border-none cursor-pointer outline-none"
                 >
                   {submitting ? (

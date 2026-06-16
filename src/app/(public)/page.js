@@ -8,6 +8,17 @@ import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [contactStatus, setContactStatus] = useState({
+    type: "",
+    message: "",
+  });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,6 +55,51 @@ export default function Home() {
       rating: 5
     }
   ];
+
+  const handleContactChange = (event) => {
+    const { name, value } = event.target;
+    setContactForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleContactSubmit = async (event) => {
+    event.preventDefault();
+    setContactSubmitting(true);
+    setContactStatus({ type: "", message: "" });
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      setContactForm({
+        fullName: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+      setContactStatus({
+        type: "success",
+        message: "Message sent. Admin will receive it in the dashboard.",
+      });
+    } catch (error) {
+      setContactStatus({
+        type: "error",
+        message: error.message || "Failed to send message.",
+      });
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -277,11 +333,25 @@ export default function Home() {
             </div>
 
             <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleContactSubmit}>
+                {contactStatus.message && (
+                  <div
+                    className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
+                      contactStatus.type === "error"
+                        ? "border-rose-200 bg-rose-50 text-rose-700"
+                        : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    }`}
+                  >
+                    {contactStatus.message}
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name *</label>
                   <input
+                    name="fullName"
                     type="text"
+                    value={contactForm.fullName}
+                    onChange={handleContactChange}
                     placeholder="John Doe"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all placeholder:text-gray-300"
                     required
@@ -290,7 +360,10 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address *</label>
                   <input
+                    name="email"
                     type="email"
+                    value={contactForm.email}
+                    onChange={handleContactChange}
                     placeholder="john@example.com"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all placeholder:text-gray-300"
                     required
@@ -299,7 +372,10 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Phone Number</label>
                   <input
+                    name="phone"
                     type="tel"
+                    value={contactForm.phone}
+                    onChange={handleContactChange}
                     placeholder="+880 1234 567890"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all placeholder:text-gray-300"
                   />
@@ -307,14 +383,21 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Message *</label>
                   <textarea
+                    name="message"
                     rows="4"
+                    value={contactForm.message}
+                    onChange={handleContactChange}
                     placeholder="Tell us about your project..."
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all placeholder:text-gray-300 resize-none"
                     required
                   ></textarea>
                 </div>
-                <button className="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold py-4 rounded-xl shadow-lg shadow-emerald-200 transition-all duration-300 active:scale-[0.98]">
-                  Send Message
+                <button
+                  type="submit"
+                  disabled={contactSubmitting}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold py-4 rounded-xl shadow-lg shadow-emerald-200 transition-all duration-300 active:scale-[0.98] disabled:opacity-60"
+                >
+                  {contactSubmitting ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>

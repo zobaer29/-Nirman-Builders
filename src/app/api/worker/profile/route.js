@@ -119,7 +119,7 @@ export async function PUT(request) {
       updateFields.push('email = ?');
       updateParams.push(email.trim());
     }
-    if (photoUrl) {
+    if (photoUrl !== undefined) {
       updateFields.push('photoUrl = ?');
       updateParams.push(photoUrl.trim());
     }
@@ -176,6 +176,9 @@ export async function PUT(request) {
 
   } catch (error) {
     console.error('Update worker profile error:', error);
+    if (error?.code === 'ER_DUP_ENTRY') {
+      return NextResponse.json({ error: 'Username or email already exists' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to update worker profile' }, { status: 500 });
   }
 }

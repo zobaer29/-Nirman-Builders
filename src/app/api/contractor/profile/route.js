@@ -111,9 +111,16 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const { fullName, phone, nid, experience, specialization, tradeLicense, address } = body;
+    const { photoUrl, fullName, phone, nid, experience, specialization, tradeLicense, address } = body;
 
     const userId = Number(payload.userId);
+
+    if (photoUrl !== undefined) {
+      await pool.query('UPDATE users SET photoUrl = ? WHERE id = ?', [
+        photoUrl.trim(),
+        userId,
+      ]);
+    }
 
     // Check if an accepted contractor role request exists
     const [requests] = await pool.query(

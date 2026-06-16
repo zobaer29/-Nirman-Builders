@@ -194,6 +194,9 @@ export async function PUT(request) {
 
   } catch (error) {
     console.error('Profile update error:', error);
+    if (error?.code === 'ER_DUP_ENTRY') {
+      return NextResponse.json({ error: 'Username or email already exists' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
 import { ensureProjectsTable } from '@/lib/projects';
+import { ensureContactMessagesTable } from '@/lib/contactMessages';
 
 export async function GET(request) {
   try {
@@ -17,12 +18,14 @@ export async function GET(request) {
 
     // Ensure database tables are created
     await ensureProjectsTable(pool);
+    await ensureContactMessagesTable(pool);
 
     // 2. Query Statistics
     const [[{ count: totalProjects }]] = await pool.query('SELECT COUNT(*) as count FROM projects');
     const [[{ count: ongoingProjects }]] = await pool.query('SELECT COUNT(*) as count FROM projects WHERE status = \'Ongoing\'');
     const [[{ count: completedProjects }]] = await pool.query('SELECT COUNT(*) as count FROM projects WHERE status = \'Completed\'');
     const [[{ count: pendingRequests }]] = await pool.query('SELECT COUNT(*) as count FROM projects WHERE status = \'Pending\'');
+    const [[{ count: unreadContactMessages }]] = await pool.query('SELECT COUNT(*) as count FROM contact_messages WHERE status = \'Unread\'');
 
     // 3. Query Recent Project Requests
     const [recentRequests] = await pool.query(`
@@ -65,16 +68,25 @@ export async function GET(request) {
       LIMIT 3
     `);
 
+    const [contactMessages] = await pool.query(`
+      SELECT id, full_name, email, phone, message, status, created_at
+      FROM contact_messages
+      ORDER BY created_at DESC
+      LIMIT 5
+    `);
+
     return NextResponse.json({
       stats: {
         totalProjects: String(totalProjects).padStart(2, '0'),
         ongoingProjects: String(ongoingProjects).padStart(2, '0'),
         completedProjects: String(completedProjects).padStart(2, '0'),
         pendingRequests: String(pendingRequests).padStart(2, '0'),
+        unreadContactMessages: String(unreadContactMessages).padStart(2, '0'),
       },
       recentRequests,
       milestones,
       contractors,
+      contactMessages,
     }, { status: 200 });
 
   } catch (error) {

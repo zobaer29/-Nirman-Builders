@@ -10,10 +10,12 @@ export default function ContractorProfilePage() {
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [notification, setNotification] = useState({ message: '', type: '' });
 
   // Form states
   const [formData, setFormData] = useState({
+    photoUrl: '',
     fullName: '',
     phone: '',
     nid: '',
@@ -38,6 +40,7 @@ export default function ContractorProfilePage() {
         const data = await res.json();
         setProfile(data);
         setFormData({
+          photoUrl: data.user.photoUrl || '',
           fullName: data.details?.full_name || data.user.username,
           phone: data.details?.phone || '',
           nid: data.details?.nid || '',
@@ -85,6 +88,40 @@ export default function ContractorProfilePage() {
     }
   };
 
+  const uploadPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('Please choose an image file.', 'error');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const uploadData = new FormData();
+      uploadData.append('image', file);
+
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: uploadData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to upload photo');
+      }
+
+      setFormData((current) => ({ ...current, photoUrl: data.url }));
+      showToast('Photo uploaded. Save credentials to update your profile.');
+    } catch (err) {
+      showToast(err.message || 'Failed to upload photo', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -108,6 +145,13 @@ export default function ContractorProfilePage() {
   }
 
   if (!profile) return null;
+  const previewPhotoUrl = isEditing ? formData.photoUrl : profile.user.photoUrl;
+  const previewName = isEditing
+    ? formData.fullName
+    : profile.details?.full_name || profile.user.username;
+  const previewSpecialization = isEditing
+    ? formData.specialization
+    : profile.details?.specialization || 'Lead Contractor';
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-5xl mx-auto relative pb-12">
@@ -156,25 +200,25 @@ export default function ContractorProfilePage() {
         {/* Profile Info Summary */}
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end -mt-12 mb-8 relative z-10">
-            {profile.user.photoUrl ? (
+            {previewPhotoUrl ? (
               <img 
-                src={profile.user.photoUrl} 
+                src={previewPhotoUrl} 
                 alt="Profile Avatar" 
                 className="w-28 h-28 rounded-[24px] object-cover border-4 border-white shadow-xl bg-white"
                 referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-28 h-28 rounded-[24px] border-4 border-white shadow-xl bg-[#5cfd80]/20 flex items-center justify-center text-primary font-black text-4xl bg-white">
-                {profile.user.username.charAt(0).toUpperCase()}
+                {(previewName || 'C').charAt(0).toUpperCase()}
               </div>
             )}
             
             <div className="flex-1 min-w-0">
               <h2 className="text-2xl font-black text-[#06361f] truncate">
-                {profile.details?.full_name || profile.user.username}
+                {previewName}
               </h2>
               <p className="text-[#548064] text-xs font-black uppercase tracking-wider mt-0.5">
-                {profile.details?.specialization || 'Lead Contractor'}
+                {previewSpecialization}
               </p>
             </div>
             
@@ -208,6 +252,38 @@ export default function ContractorProfilePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-[#548064] uppercase tracking-wider">Profile Photo</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl premium-gradient px-4 py-3 text-sm font-black text-white shadow-lg shadow-primary/20 transition-all">
+                        <span className="material-symbols-outlined text-lg">upload</span>
+                        {uploading ? 'Uploading...' : 'Upload Photo'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={uploadPhoto}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        disabled={uploading || !formData.photoUrl}
+                        onClick={() => setFormData({ ...formData, photoUrl: '' })}
+                        className="px-4 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl font-black text-sm transition-colors disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.photoUrl}
+                      onChange={e => setFormData({ ...formData, photoUrl: e.target.value })}
+                      placeholder="Uploaded image URL"
+                      className="w-full bg-[#f4f7f6] outline-none border border-zinc-200 rounded-xl p-3 text-sm focus:border-primary font-bold text-[#06361f]"
+                    />
+                  </div>
+
                   {/* Full Name */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-[#548064] uppercase tracking-wider">Full Business Name</label>
@@ -297,14 +373,17 @@ export default function ContractorProfilePage() {
               <div className="flex gap-3 pt-4 justify-end">
                 <button
                   type="button"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    fetchProfile();
+                  }}
                   className="px-6 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-2xl font-black text-sm uppercase tracking-wider transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || uploading}
                   className="premium-gradient text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center gap-2"
                 >
                   {submitting ? (

@@ -16,6 +16,7 @@ const EMPTY_FORM = {
   location: "",
   description: "",
   budget: "",
+  image_url: "",
 };
 
 const getStatusColor = (status) => {
@@ -39,6 +40,7 @@ const Projects = () => {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState("");
 
   const fetchProjects = useCallback(async () => {
@@ -74,6 +76,42 @@ const Projects = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleProjectImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      setError("");
+
+      const uploadData = new FormData();
+      uploadData.append("image", file);
+
+      const res = await fetch("/api/upload/image", {
+        method: "POST",
+        body: uploadData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload project image");
+      }
+
+      setForm((prev) => ({ ...prev, image_url: data.url }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleCreateProject = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -89,6 +127,7 @@ const Projects = () => {
           location: form.location,
           description: form.description,
           budget: form.budget,
+          image_url: form.image_url,
         }),
       });
       const data = await res.json();
@@ -319,6 +358,7 @@ const Projects = () => {
                   setShowModal(false);
                   setForm(EMPTY_FORM);
                   setError("");
+                  setUploadingImage(false);
                 }}
                 className="w-10 h-10 rounded-xl bg-[#f0fff4] text-[#006a28] flex items-center justify-center hover:bg-[#c7fdd8] transition-colors"
               >
@@ -408,6 +448,67 @@ const Projects = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-black text-[#39644a] uppercase tracking-wider mb-2">
+                  Project Picture
+                </label>
+                <div className="rounded-2xl border border-[#006a28]/10 bg-[#f0fff4] p-4 space-y-4">
+                  {form.image_url ? (
+                    <div className="relative h-44 overflow-hidden rounded-2xl bg-white border border-[#006a28]/10">
+                      <img
+                        src={form.image_url}
+                        alt="Project preview"
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, image_url: "" }))
+                        }
+                        disabled={uploadingImage}
+                        className="absolute top-3 right-3 h-9 w-9 rounded-xl bg-white/90 text-rose-600 shadow-md flex items-center justify-center hover:bg-white disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-lg">
+                          close
+                        </span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-36 rounded-2xl border border-dashed border-[#006a28]/30 bg-white/60 flex flex-col items-center justify-center text-center px-4">
+                      <span className="material-symbols-outlined text-4xl text-[#006a28]/50">
+                        add_photo_alternate
+                      </span>
+                      <p className="text-xs font-bold text-[#548064] mt-2">
+                        Upload a project image, plan, or site reference
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <label className="flex-1 cursor-pointer bg-[#006a28] text-white py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#005a22] transition-colors flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-lg">
+                        upload
+                      </span>
+                      {uploadingImage ? "Uploading..." : "Upload Picture"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProjectImageUpload}
+                        disabled={uploadingImage}
+                        className="hidden"
+                      />
+                    </label>
+                    <input
+                      name="image_url"
+                      value={form.image_url}
+                      onChange={handleFormChange}
+                      placeholder="ImgBB image URL"
+                      className="flex-[1.5] bg-white border border-[#006a28]/10 rounded-2xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-[#006a28]/30"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -415,6 +516,7 @@ const Projects = () => {
                     setShowModal(false);
                     setForm(EMPTY_FORM);
                     setError("");
+                    setUploadingImage(false);
                   }}
                   className="flex-1 py-4 rounded-2xl font-black text-sm text-[#39644a] bg-[#f0fff4] hover:bg-[#c7fdd8] transition-colors"
                 >
@@ -422,7 +524,7 @@ const Projects = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || uploadingImage}
                   className="flex-1 bg-[#006a28] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#005a22] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {submitting ? (
