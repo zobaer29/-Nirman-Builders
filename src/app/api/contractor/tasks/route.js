@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
-import { ensureProjectsTable } from '@/lib/projects';
+import { ensureProjectsTable, recalculateProjectProgress } from '@/lib/projects';
 
 export async function POST(request) {
   try {
@@ -85,6 +85,8 @@ export async function POST(request) {
       dueDate?.trim() || 'Flexible'
     ]);
 
+    const projectProgress = await recalculateProjectProgress(pool, projectId);
+
     return NextResponse.json({ 
       message: 'Task created successfully',
       taskId: result.insertId,
@@ -92,7 +94,8 @@ export async function POST(request) {
       workerId: dbWorkerId,
       title,
       priority: finalPriority,
-      dueDate: dueDate || 'Flexible'
+      dueDate: dueDate || 'Flexible',
+      project: projectProgress
     }, { status: 201 });
 
   } catch (error) {

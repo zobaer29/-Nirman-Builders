@@ -11,7 +11,7 @@ export async function GET(request) {
 
     await ensureProjectsTable(pool);
 
-    // 1. Weekly Data (mocked based on actual tasks for now since we don't have hours tracking)
+    // 1. Weekly Data from completed tasks.
     const [weeklyTasks] = await pool.query(`
       SELECT 
         DAYNAME(t.updated_at) as day_name,
@@ -39,18 +39,6 @@ export async function GET(request) {
         dayObj.hours = row.count * 4; 
       }
     });
-
-    if (weeklyData.every(d => d.tasks === 0)) {
-      weeklyData = [
-        { day: 'Mon', tasks: 12, hours: 48 },
-        { day: 'Tue', tasks: 15, hours: 60 },
-        { day: 'Wed', tasks: 8, hours: 32 },
-        { day: 'Thu', tasks: 18, hours: 72 },
-        { day: 'Fri', tasks: 14, hours: 56 },
-        { day: 'Sat', tasks: 5,  hours: 20 },
-        { day: 'Sun', tasks: 2,  hours: 8 },
-      ];
-    }
 
     // 2. Project Health
     const [projects] = await pool.query(`
@@ -86,13 +74,50 @@ export async function GET(request) {
       JOIN projects p ON t.project_id = p.id 
       WHERE p.contractor_id = ? AND t.status = 'Completed' AND t.updated_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
     `, [payload.userId]);
+
+    const [[efficiency]] = await pool.query(`
+      SELECT
+        AVG(CASE
+          WHEN t.status = 'Completed' THEN 100
+          WHEN t.status = 'In Progress' THEN 50
+          ELSE 0
+        END) as taskEfficiency,
+        AVG(p.progress) as scheduleAdherence,
+        AVG(p.progress) as budgetUtilization
+      FROM projects p
+      LEFT JOIN tasks t ON t.project_id = p.id
+      WHERE p.contractor_id = ?
+    `, [payload.userId]);
+
+    const [[material]] = await pool.query(`
+      SELECT
+        AVG(CASE
+          WHEN status = 'OK' THEN 100
+          WHEN status = 'Low' THEN 50
+          ELSE 0
+        END) as materialUsage
+      FROM materials
+    `);
+
+    const [[labour]] = await pool.query(`
+      SELECT AVG(pw.attendance) as labourProductivity
+      FROM project_workers pw
+      JOIN projects p ON pw.project_id = p.id
+      WHERE p.contractor_id = ? AND pw.status = 'Active'
+    `, [payload.userId]);
+
+    const workflowEfficiency = Math.round(Number(efficiency?.taskEfficiency ?? efficiency?.scheduleAdherence ?? 0));
+    const scheduleAdherence = Math.round(Number(efficiency?.scheduleAdherence || 0));
+    const budgetUtilization = Math.round(Number(efficiency?.budgetUtilization || 0));
+    const materialUsage = Math.round(Number(material?.materialUsage || 0));
+    const labourProductivity = Math.round(Number(labour?.labourProductivity || 0));
     
     const delayedProjects = projectHealth.filter(p => !p.onTime).length;
 
     const kpis = [
       { label: 'Total Projects', value: String(totalProjects || 0), sub: 'All active', icon: 'architecture', bg: 'bg-primary/10', color: 'text-primary' },
-      { label: 'Workflow Efficiency', value: '92.4%', sub: '+1.2% vs last month', icon: 'bolt', bg: 'bg-primary/10', color: 'text-[#006a28]' },
-      { label: 'Budget Utilization', value: '65%', sub: 'Within target', icon: 'payments', bg: 'bg-blue-50', color: 'text-blue-600' },
+      { label: 'Workflow Efficiency', value: `${workflowEfficiency}%`, sub: 'Based on task completion', icon: 'bolt', bg: 'bg-primary/10', color: 'text-[#006a28]' },
+      { label: 'Budget Utilization', value: `${budgetUtilization}%`, sub: 'Mapped to project progress', icon: 'payments', bg: 'bg-blue-50', color: 'text-blue-600' },
       { label: 'Tasks Completed', value: String(tasksCompleted || 0), sub: 'This week', icon: 'task_alt', bg: 'bg-purple-50', color: 'text-purple-600' },
       { label: 'Safety Incidents', value: '0', sub: '32-day streak', icon: 'health_and_safety', bg: 'bg-primary/10', color: 'text-[#006a28]' },
       { label: 'Delayed Projects', value: String(delayedProjects), sub: delayedProjects > 0 ? 'Needs attention' : 'All on track', icon: 'warning', bg: 'bg-red-50', color: 'text-red-500' },
@@ -100,9 +125,9 @@ export async function GET(request) {
 
     // 4. Efficiency Rings
     const efficiencyRings = [
-      { label: 'Schedule Adherence', value: 88, stroke: '#16a34a' },
-      { label: 'Material Usage',     value: 92, stroke: '#60a5fa' },
-      { label: 'Labour Productivity',value: 85, stroke: '#a78bfa' },
+      { label: 'Schedule Adherence', value: scheduleAdherence, stroke: '#16a34a' },
+      { label: 'Material Usage',     value: materialUsage, stroke: '#60a5fa' },
+      { label: 'Labour Productivity',value: labourProductivity, stroke: '#a78bfa' },
     ];
 
     return NextResponse.json({

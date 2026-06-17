@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
-import { ensureProjectsTable } from '@/lib/projects';
+import { ensureProjectsTable, recalculateProjectProgress } from '@/lib/projects';
 
 export async function GET(request) {
   try {
@@ -90,6 +90,8 @@ export async function PUT(request) {
         INSERT INTO tasks (project_id, worker_id, title, description, status, priority, due_date, material_request_id)
         VALUES (?, ?, ?, ?, 'Pending', ?, 'Today', ?)
       `, [requestItem.project_id, requestItem.worker_id, taskTitle, taskDesc, priority, requestItem.id]);
+
+      await recalculateProjectProgress(pool, requestItem.project_id);
     }
 
     return NextResponse.json({ 

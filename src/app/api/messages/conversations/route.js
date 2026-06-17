@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { getAuthPayload } from "@/lib/auth";
-import { ensureDirectConversation, formatChatTime } from "@/lib/chat";
+import {
+  ensureDirectConversation,
+  formatChatTime,
+  getAllowedChatRoleIds,
+} from "@/lib/chat";
 
 const ROLE_LABELS = {
   1: "Admin",
@@ -29,7 +33,10 @@ function mergeContact(map, row, role) {
 
 async function getAllContacts(payload) {
   const userId = Number(payload.userId);
+  const allowedRoleIds = getAllowedChatRoleIds(payload.roleId);
   const contacts = new Map();
+
+  if (allowedRoleIds.length === 0) return [];
 
   const [rows] = await pool.query(
     `SELECT u.id, u.username, u.email, u.photoUrl, u.role_id, r.full_name
@@ -44,7 +51,9 @@ async function getAllContacts(payload) {
          GROUP BY user_id
        ) r2 ON r1.user_id = r2.user_id AND r1.created_at = r2.max_date
      ) r ON u.id = r.user_id
-     WHERE u.id <> ? AND COALESCE(u.is_active, 1) = 1
+     WHERE u.id <> ?
+       AND u.role_id IN (?)
+       AND COALESCE(u.is_active, 1) = 1
      ORDER BY 
        CASE u.role_id
          WHEN 1 THEN 1
@@ -54,7 +63,7 @@ async function getAllContacts(payload) {
          ELSE 5
        END,
        u.username ASC`,
-    [userId]
+    [userId, allowedRoleIds]
   );
 
   rows.forEach((row) =>

@@ -7,25 +7,25 @@ const COPY = {
     title: "Messages",
     search: "Search chats...",
     input: "Type your message...",
-    empty: "Other active users will appear here after accounts are created.",
+    empty: "Admins and workers will appear here after accounts are created.",
   },
   worker: {
     title: "Communication",
     search: "Search team...",
     input: "Type a quick update...",
-    empty: "Other active users will appear here after accounts are created.",
+    empty: "Clients and contractors will appear here after accounts are created.",
   },
   contractor: {
     title: "Communication",
     search: "Search messages...",
     input: "Type your message...",
-    empty: "Other active users will appear here after accounts are created.",
+    empty: "Admins and workers will appear here after accounts are created.",
   },
   admin: {
     title: "Messages",
     search: "Search messages...",
     input: "Type your message...",
-    empty: "Users will appear here after accounts are created.",
+    empty: "Clients and contractors will appear here after accounts are created.",
   },
 };
 

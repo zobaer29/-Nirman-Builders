@@ -215,6 +215,64 @@ export function mapProjectRow(row, clientName, contractorName) {
   };
 }
 
+export function getTaskProgressValue(status) {
+  if (status === "Completed") return 100;
+  if (status === "In Progress") return 50;
+  return 0;
+}
+
+export async function recalculateProjectProgress(pool, projectId) {
+  const id = Number(projectId);
+  if (!id) return null;
+
+  const [[project]] = await pool.query(
+    "SELECT id, status FROM projects WHERE id = ?",
+    [id]
+  );
+
+  if (!project) return null;
+
+  const [[summary]] = await pool.query(
+    `SELECT
+       COUNT(*) AS totalTasks,
+       SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completedTasks,
+       AVG(CASE
+         WHEN status = 'Completed' THEN 100
+         WHEN status = 'In Progress' THEN 50
+         ELSE 0
+       END) AS progress
+     FROM tasks
+     WHERE project_id = ?`,
+    [id]
+  );
+
+  const totalTasks = Number(summary?.totalTasks || 0);
+  const completedTasks = Number(summary?.completedTasks || 0);
+  const progress = totalTasks > 0
+    ? Math.max(0, Math.min(100, Math.round(Number(summary.progress || 0))))
+    : Number(project.status === "Completed" ? 100 : 0);
+
+  let nextStatus = project.status;
+  if (!["Pending", "Rejected"].includes(project.status)) {
+    nextStatus = totalTasks > 0 && completedTasks === totalTasks
+      ? "Completed"
+      : "Ongoing";
+  }
+
+  await pool.query(
+    "UPDATE projects SET progress = ?, status = ? WHERE id = ?",
+    [progress, nextStatus, id]
+  );
+
+  return {
+    projectId: id,
+    progress,
+    status: nextStatus,
+    totalTasks,
+    completedTasks,
+  };
+}
+
 export async function updateMaterialStock(pool, materialName, quantity, siteName) {
   let queryName = materialName;
   if (materialName.includes('Cement')) {

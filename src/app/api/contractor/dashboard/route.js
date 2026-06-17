@@ -3,6 +3,21 @@ import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
 import { ensureProjectsTable } from '@/lib/projects';
 
+function getNextMilestone(row) {
+  const totalTasks = Number(row.total_tasks || 0);
+  const completedTasks = Number(row.completed_tasks || 0);
+
+  if (row.status === 'Completed' || (totalTasks > 0 && completedTasks === totalTasks)) {
+    return 'All tasks complete';
+  }
+
+  if (row.next_task_title) {
+    return row.next_task_title;
+  }
+
+  return 'Create first task';
+}
+
 export async function GET(request) {
   try {
     // 1. Verify token & authorize (Contractor only)
@@ -31,11 +46,44 @@ export async function GET(request) {
       WHERE p.contractor_id = ? AND pw.status = 'Active'
     `, [payload.userId]);
 
+    const [[efficiencyRow]] = await pool.query(`
+      SELECT
+        AVG(CASE
+          WHEN t.status = 'Completed' THEN 100
+          WHEN t.status = 'In Progress' THEN 50
+          ELSE 0
+        END) as taskEfficiency,
+        AVG(p.progress) as projectProgress
+      FROM projects p
+      LEFT JOIN tasks t ON t.project_id = p.id
+      WHERE p.contractor_id = ?
+        AND p.status IN ('Ongoing', 'Completed')
+    `, [payload.userId]);
+
+    const workflowEfficiency = Math.round(
+      Number(efficiencyRow?.taskEfficiency ?? efficiencyRow?.projectProgress ?? 0)
+    );
+
     // 3. Query active project lists
     const [ongoingProjects] = await pool.query(`
       SELECT 
         p.*,
-        (SELECT COUNT(*) FROM project_workers pw WHERE pw.project_id = p.id AND pw.status = 'Active') as active_labor
+        (SELECT COUNT(*) FROM project_workers pw WHERE pw.project_id = p.id AND pw.status = 'Active') as active_labor,
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'Completed') as completed_tasks,
+        (
+          SELECT t.title
+          FROM tasks t
+          WHERE t.project_id = p.id AND t.status <> 'Completed'
+          ORDER BY
+            CASE t.status
+              WHEN 'In Progress' THEN 1
+              WHEN 'Pending' THEN 2
+              ELSE 3
+            END,
+            t.created_at ASC
+          LIMIT 1
+        ) as next_task_title
       FROM projects p
       WHERE p.contractor_id = ? AND p.status = 'Ongoing'
       ORDER BY p.updated_at DESC
@@ -81,6 +129,7 @@ export async function GET(request) {
       name: contractorName,
       activeProjects,
       workforce,
+      workflowEfficiency,
       projects: ongoingProjects.map(p => ({
         id: p.id,
         name: p.name,
@@ -88,8 +137,8 @@ export async function GET(request) {
         status: p.status,
         progress: p.progress || 0,
         labor: p.active_labor || 0,
-        deadline: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'TBD',
-        milestone: 'Active Phase'
+        deadline: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'TBD',
+        milestone: getNextMilestone(p)
       })),
       crew: team.map((member, idx) => ({
         name: member.full_name || member.username,

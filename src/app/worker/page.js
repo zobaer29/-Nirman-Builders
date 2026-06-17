@@ -117,11 +117,17 @@ export default function WorkerDashboard() {
         body: JSON.stringify({ status: nextStatus, result: resultValue }),
       });
       if (res.ok) {
-        // Refresh tasks list
-        const tasksRes = await fetch('/api/worker/tasks');
+        const [tasksRes, sitesRes] = await Promise.all([
+          fetch('/api/worker/tasks'),
+          fetch('/api/worker/projects'),
+        ]);
         if (tasksRes.ok) {
           const tasksData = await tasksRes.json();
           setTasks(tasksData.tasks || []);
+        }
+        if (sitesRes.ok) {
+          const sitesData = await sitesRes.json();
+          setSites(sitesData.sites || []);
         }
       } else {
         const err = await res.json();

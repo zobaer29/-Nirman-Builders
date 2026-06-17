@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
-import { ensureProjectsTable, updateMaterialStock } from '@/lib/projects';
+import { ensureProjectsTable, recalculateProjectProgress, updateMaterialStock } from '@/lib/projects';
 
 export async function PUT(request, { params }) {
   try {
@@ -108,10 +108,13 @@ export async function PUT(request, { params }) {
       }
     }
 
+    const projectProgress = await recalculateProjectProgress(pool, task.project_id);
+
     return NextResponse.json({ 
       message: 'Task status updated successfully',
       taskId,
-      status
+      status,
+      project: projectProgress
     }, { status: 200 });
 
   } catch (error) {

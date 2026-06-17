@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { getAuthPayload } from "@/lib/auth";
-import { userCanAccessConversation } from "@/lib/chat";
+import {
+  userCanAccessConversation,
+  userCanAccessAllowedConversation,
+} from "@/lib/chat";
 
 async function getConversationId(params) {
   const resolved = await params;
@@ -31,6 +34,16 @@ export async function GET(request, { params }) {
     );
 
     if (!canAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const canUseRolePair = await userCanAccessAllowedConversation(
+      pool,
+      currentUserId,
+      conversationId
+    );
+
+    if (!canUseRolePair) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -105,6 +118,16 @@ export async function POST(request, { params }) {
     );
 
     if (!canAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const canUseRolePair = await userCanAccessAllowedConversation(
+      pool,
+      currentUserId,
+      conversationId
+    );
+
+    if (!canUseRolePair) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

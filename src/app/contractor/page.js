@@ -18,6 +18,8 @@ export default function ContractorDashboard() {
     return <div className="flex items-center justify-center min-h-[60vh]"><div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
   }
 
+  const workflowEfficiency = Math.max(0, Math.min(100, Number(data?.workflowEfficiency || 0)));
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full overflow-x-hidden">
       {/* Welcome Section */}
@@ -99,15 +101,15 @@ export default function ContractorDashboard() {
               <p className="text-[#548064] text-xs font-black uppercase tracking-widest mb-1">
                 Workflow Efficiency
               </p>
-              <h3 className="text-5xl font-black text-[#06361f]">94.2%</h3>
+              <h3 className="text-5xl font-black text-[#06361f]">{workflowEfficiency}%</h3>
             </div>
             <div className="flex-1 max-w-xs space-y-2">
               <div className="flex justify-between text-[10px] font-black uppercase text-[#548064]">
-                <span>Weekly Target</span>
-                <span>85%</span>
+                <span>Live Task Flow</span>
+                <span>{workflowEfficiency}%</span>
               </div>
               <div className="h-3 w-full bg-[#f0f4f2] rounded-full overflow-hidden">
-                <div className="h-full premium-gradient rounded-full" style={{ width: '94%' }}></div>
+                <div className="h-full premium-gradient rounded-full" style={{ width: `${workflowEfficiency}%` }}></div>
               </div>
             </div>
           </div>

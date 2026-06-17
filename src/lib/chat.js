@@ -1,3 +1,33 @@
+export const CHAT_ROLE_PAIRS = [
+  [1, 2], // Admin <-> Client
+  [1, 3], // Admin <-> Contractor
+  [2, 4], // Client <-> Worker
+  [3, 4], // Contractor <-> Worker
+];
+
+export function canRolesChat(leftRoleId, rightRoleId) {
+  const left = Number(leftRoleId);
+  const right = Number(rightRoleId);
+
+  if (!left || !right || left === right) return false;
+
+  return CHAT_ROLE_PAIRS.some(([a, b]) => (
+    (a === left && b === right) || (a === right && b === left)
+  ));
+}
+
+export function getAllowedChatRoleIds(roleId) {
+  const currentRoleId = Number(roleId);
+  const allowed = new Set();
+
+  CHAT_ROLE_PAIRS.forEach(([left, right]) => {
+    if (left === currentRoleId) allowed.add(right);
+    if (right === currentRoleId) allowed.add(left);
+  });
+
+  return [...allowed];
+}
+
 export async function ensureDirectConversation(pool, userId, contactId) {
   const leftId = Number(userId);
   const rightId = Number(contactId);
@@ -77,6 +107,27 @@ export async function userCanAccessConversation(pool, userId, conversationId) {
   );
 
   return rows.length > 0;
+}
+
+export async function userCanAccessAllowedConversation(pool, userId, conversationId) {
+  const [rows] = await pool.query(
+    `SELECT u.id, u.role_id
+     FROM conversation_participants cp
+     JOIN users u ON cp.user_id = u.id
+     WHERE cp.conversation_id = ?`,
+    [conversationId]
+  );
+
+  if (rows.length !== 2) return false;
+
+  const currentUser = rows.find((row) => Number(row.id) === Number(userId));
+  const otherUser = rows.find((row) => Number(row.id) !== Number(userId));
+
+  return Boolean(
+    currentUser &&
+    otherUser &&
+    canRolesChat(currentUser.role_id, otherUser.role_id)
+  );
 }
 
 export function formatChatTime(value) {

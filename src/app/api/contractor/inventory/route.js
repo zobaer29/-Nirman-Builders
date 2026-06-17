@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
-import { ensureProjectsTable } from '@/lib/projects';
+import { ensureProjectsTable, recalculateProjectProgress } from '@/lib/projects';
 
 export async function GET(request) {
   try {
@@ -97,6 +97,8 @@ export async function POST(request) {
       INSERT INTO tasks (project_id, worker_id, title, description, status, priority, due_date)
       VALUES (?, ?, ?, ?, 'Pending', 'Medium', 'Flexible')
     `, [projectId, workerId, taskTitle, taskDesc]);
+
+    await recalculateProjectProgress(pool, projectId);
 
     return NextResponse.json({ 
       message: 'Order placed and worker task generated successfully'

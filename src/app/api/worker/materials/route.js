@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthPayload } from '@/lib/auth';
-import { ensureProjectsTable, updateMaterialStock } from '@/lib/projects';
+import { ensureProjectsTable, recalculateProjectProgress, updateMaterialStock } from '@/lib/projects';
 
 export async function GET(request) {
   try {
@@ -125,10 +125,18 @@ export async function PUT(request) {
       ['Received', Number(requestId)]
     );
 
+    await pool.query(
+      "UPDATE tasks SET status = 'Completed' WHERE material_request_id = ?",
+      [Number(requestId)]
+    );
+
+    const projectProgress = await recalculateProjectProgress(pool, reqItem.project_id);
+
     return NextResponse.json({ 
       message: 'Material request marked as received successfully',
       requestId,
-      status: 'Received'
+      status: 'Received',
+      project: projectProgress
     }, { status: 200 });
 
   } catch (error) {

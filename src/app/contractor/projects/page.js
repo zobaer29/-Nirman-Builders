@@ -16,6 +16,7 @@ const colorMap = {
 
 export default function ContractorProjects() {
   const [projects, setProjects] = useState([]);
+  const [stats, setStats] = useState({ totalActive: 0, delayed: 0, onSchedule: 0, avgProgress: 0 });
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('All');
   const filters = ['All', 'In Progress', 'Delayed', 'On Schedule'];
@@ -37,12 +38,13 @@ export default function ContractorProjects() {
             progress: p.progress || 0,
             labor: p.labor || 0,
             deadline: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'TBD',
-            milestone: 'Active Phase',
+            milestone: p.nextMilestone || 'Create first task',
             budget: p.budget,
             spent: '—',
             color: p.status === 'Ongoing' ? 'primary' : p.status === 'Completed' ? 'secondary' : 'error'
           }));
           setProjects(mapped);
+          setStats(data.stats || { totalActive: 0, delayed: 0, onSchedule: 0, avgProgress: 0 });
         }
       } catch (err) {
         console.error('Failed to fetch contractor projects', err);
@@ -72,10 +74,10 @@ export default function ContractorProjects() {
       {/* Summary Stats */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Active', value: '6', icon: 'architecture', color: 'text-primary', bg: 'bg-primary/10' },
-          { label: 'Delayed', value: '1', icon: 'warning', color: 'text-red-500', bg: 'bg-red-50' },
-          { label: 'On Schedule', value: '2', icon: 'check_circle', color: 'text-blue-500', bg: 'bg-blue-50' },
-          { label: 'Avg Progress', value: '58%', icon: 'trending_up', color: 'text-[#006a28]', bg: 'bg-primary/10' },
+          { label: 'Total Active', value: String(stats.totalActive || 0), icon: 'architecture', color: 'text-primary', bg: 'bg-primary/10' },
+          { label: 'Delayed', value: String(stats.delayed || 0), icon: 'warning', color: 'text-red-500', bg: 'bg-red-50' },
+          { label: 'On Schedule', value: String(stats.onSchedule || 0), icon: 'check_circle', color: 'text-blue-500', bg: 'bg-blue-50' },
+          { label: 'Avg Progress', value: `${stats.avgProgress || 0}%`, icon: 'trending_up', color: 'text-[#006a28]', bg: 'bg-primary/10' },
         ].map((stat) => (
           <div key={stat.label} className="glass p-6 rounded-[28px] premium-shadow flex items-center gap-4">
             <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center ${stat.color}`}>
