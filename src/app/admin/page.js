@@ -81,10 +81,7 @@ export default function AdminDashboard() {
             Nirman Builders Performance Metrics
           </p>
         </div>
-        <div className="flex gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-          <button className="px-6 py-2 bg-[#006a28] text-white rounded-xl text-xs font-black uppercase tracking-widest">Real-time</button>
-          <button className="px-6 py-2 text-[#548064] hover:bg-[#f0fff4] rounded-xl text-xs font-black uppercase tracking-widest transition-all">Historical</button>
-        </div>
+       
       </div>
 
       {/* Summary Cards */}

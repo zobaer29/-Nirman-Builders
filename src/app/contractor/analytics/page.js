@@ -45,14 +45,7 @@ export default function ContractorAnalytics() {
           </h2>
           <p className="text-[#548064] font-bold mt-1">Real-time data across all your active projects</p>
         </div>
-        <div className="flex gap-3">
-          <button className="glass px-5 py-3 rounded-2xl font-black text-[#06361f] flex items-center gap-2 hover:bg-white transition-all text-sm">
-            <span className="material-symbols-outlined text-lg">calendar_today</span> This Week
-          </button>
-          <button className="premium-gradient text-white px-5 py-3 rounded-2xl font-black flex items-center gap-2 shadow-xl shadow-primary/20 hover:scale-[1.03] transition-all text-sm">
-            <span className="material-symbols-outlined text-lg">file_download</span> Export
-          </button>
-        </div>
+        
       </section>
 
       {/* KPI Grid */}

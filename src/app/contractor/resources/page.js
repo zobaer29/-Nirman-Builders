@@ -114,9 +114,7 @@ export default function ContractorResources() {
           </h2>
           <p className="text-[#548064] font-bold mt-1">Track inventory and machinery across all sites</p>
         </div>
-        <button className="premium-gradient text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 shadow-xl shadow-primary/20 hover:scale-[1.03] transition-all text-sm">
-          <span className="material-symbols-outlined text-lg">add_shopping_cart</span> Request Supply
-        </button>
+       
       </section>
 
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -142,7 +140,7 @@ export default function ContractorResources() {
         {[
           { id: 'materials', label: 'Materials' },
           { id: 'requests', label: `Worker Requests (${requests.filter(r => r.status === 'Pending').length})` },
-          { id: 'equipment', label: 'Equipment' }
+         
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === t.id ? 'premium-gradient text-white shadow-lg shadow-primary/20' : 'glass text-[#548064] hover:bg-white'

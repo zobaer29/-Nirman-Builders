@@ -36,16 +36,7 @@ export default function ContractorDashboard() {
             Nirman Builders • Sector 14 Development Phase
           </p>
         </div>
-        <div className="flex gap-3 w-full lg:w-auto">
-          <button className="flex-1 lg:flex-none glass px-8 py-4 rounded-3xl font-black text-[#06361f] flex items-center justify-center gap-2 hover:bg-white transition-all shadow-sm">
-            <span className="material-symbols-outlined text-xl">file_download</span>
-            Report
-          </button>
-          <button className="flex-1 lg:flex-none premium-gradient text-white px-8 py-4 rounded-3xl font-black flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-[1.03] transition-all">
-            <span className="material-symbols-outlined text-xl">auto_awesome</span>
-            Quick Insights
-          </button>
-        </div>
+        
       </section>
 
       {/* Bento Grid Stats */}

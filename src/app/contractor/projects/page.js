@@ -66,16 +66,7 @@ export default function ContractorProjects() {
           </h2>
           <p className="text-[#548064] font-bold mt-1">{projects.length} active sites across all phases</p>
         </div>
-        <div className="flex gap-3">
-          <button className="glass px-6 py-3 rounded-2xl font-black text-[#06361f] flex items-center gap-2 hover:bg-white transition-all shadow-sm text-sm">
-            <span className="material-symbols-outlined text-lg">file_download</span>
-            Export
-          </button>
-          <button className="premium-gradient text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 shadow-xl shadow-primary/20 hover:scale-[1.03] transition-all text-sm">
-            <span className="material-symbols-outlined text-lg">add</span>
-            New Project
-          </button>
-        </div>
+        
       </section>
 
       {/* Summary Stats */}
