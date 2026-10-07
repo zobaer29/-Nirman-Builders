@@ -88,9 +88,9 @@ const WorkerPage = () => {
                             </thead>
 
                             <tbody className="divide-y divide-slate-50">
-                                {filteredWorkers.map(w => (
+                                {filteredWorkers.map((w, idx) => (
                                     <TableRow
-                                        key={w.id}
+                                        key={`${w.id}-${idx}`}
                                         id={w.id}
                                         name={w.name}
                                         trade={w.trade}

@@ -173,6 +173,7 @@ export default function Home() {
                   className="w-full h-[400px] object-cover"
                   src="/img/building-construction-worker-site-with-architect.jpg"
                   alt="Who We Are"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
               </div>

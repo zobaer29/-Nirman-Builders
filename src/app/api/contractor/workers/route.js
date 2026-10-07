@@ -28,21 +28,29 @@ export async function GET(request) {
         r.full_name,
         r.phone,
         r.specialization as trade,
-        p.name as current_assignment,
-        pw.status as assignment_status
+        (
+          SELECT GROUP_CONCAT(p.name SEPARATOR ', ')
+          FROM project_workers pw
+          JOIN projects p ON pw.project_id = p.id
+          WHERE pw.worker_id = u.id AND pw.status = 'Active'
+        ) as current_assignment,
+        (
+          SELECT pw.status
+          FROM project_workers pw
+          WHERE pw.worker_id = u.id AND pw.status = 'Active'
+          LIMIT 1
+        ) as assignment_status
       FROM users u
       LEFT JOIN (
-        SELECT r1.*
+        SELECT r1.user_id, r1.full_name, r1.phone, r1.specialization
         FROM role_requests r1
         JOIN (
-          SELECT user_id, MAX(created_at) as max_date
+          SELECT user_id, MAX(id) as max_id
           FROM role_requests
           WHERE requested_role = 'worker' AND status = 'accepted'
           GROUP BY user_id
-        ) r2 ON r1.user_id = r2.user_id AND r1.created_at = r2.max_date
+        ) r2 ON r1.id = r2.max_id
       ) r ON u.id = r.user_id
-      LEFT JOIN project_workers pw ON u.id = pw.worker_id AND pw.status = 'Active'
-      LEFT JOIN projects p ON pw.project_id = p.id
       WHERE u.role_id = 4
       ORDER BY u.created_at DESC
     `);

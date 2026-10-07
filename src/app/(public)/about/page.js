@@ -13,6 +13,7 @@ export default function About() {
               className="w-full rounded-2xl shadow-lg"
               src="/img/civil-engineer-construction-worker-architects-wearing-hardhats-safety-vests-are-working-together-construction-site-building-home-cooperation-teamwork-concept.jpg"
               alt="Nirman Builders team"
+              loading="lazy"
             />
           </div>
           <div>

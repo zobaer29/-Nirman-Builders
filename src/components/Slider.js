@@ -25,16 +25,6 @@ export default function Slider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  useEffect(() => {
-    if (!isAutoPlaying) return;
-
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [currentSlide, isAutoPlaying]);
-
   const nextSlide = () => {
     setCurrentSlide((prev) =>
       prev === slides.length - 1 ? 0 : prev + 1
@@ -46,6 +36,16 @@ export default function Slider() {
       prev === 0 ? slides.length - 1 : prev - 1
     );
   };
+
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [currentSlide, isAutoPlaying]);
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
@@ -71,6 +71,8 @@ export default function Slider() {
                 src={slide.image}
                 alt={slide.alt}
                 className="w-full h-full object-cover"
+                fetchPriority={index === 0 ? "high" : "low"}
+                loading={index === 0 ? "eager" : "lazy"}
               />
               {/* Dark overlay for better text readability */}
               <div className="absolute inset-0 bg-black/50"></div>
