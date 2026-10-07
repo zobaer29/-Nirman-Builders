@@ -1,0 +1,112 @@
+================================================================================
+NIRMAN BUILDERS – PROJECT TECH STACK & SERVICES GUIDE FOR CV / RESUME
+================================================================================
+Project: Nirman Builders (Enterprise Construction & Project Management Platform)
+Developer: Md. Zobaer Islam
+Portfolio: https://zobaer.dev | Email: zobaerislamshanto@gmail.com
+Role: Full-Stack Web Developer / Software Engineer
+Type: Full-Stack Web Application (Next.js 16, React 19, MySQL, Cloud & AI)
+================================================================================
+
+
+1. CORE TECHNOLOGIES & PROGRAMMING LANGUAGES
+--------------------------------------------------------------------------------
+- Languages: JavaScript (ES6+), SQL, HTML5, CSS3
+- Frontend Framework: Next.js 16 (App Router, Turbopack, Server & Client Components)
+- UI Library: React 19
+- Styling / Design: Tailwind CSS v4, Responsive Web Design, Modern UI/UX
+- Carousels / Sliders: Swiper.js
+
+
+2. BACKEND ARCHITECTURE & DATABASE
+--------------------------------------------------------------------------------
+- Runtime Environment: Node.js (v26 LTS)
+- API Architecture: Next.js RESTful Route Handlers (`src/app/api/...`)
+- Database Engine: MySQL 8.4 (Relational Database Management System)
+- Database Driver: `mysql2/promise` (Connection Pooling, Prepared Statements, Secure Queries)
+- Database Cloud Provider: Aiven Cloud MySQL (Managed DBaaS with SSL/TLS encryption)
+- Relational Schema Design:
+  * 12 Relational Tables with Foreign Key Constraints & Cascading rules
+  * Tables: roles, users, role_requests, projects, project_workers,
+    material_requests, tasks, materials (inventory), contact_messages,
+    conversations, conversation_participants, messages
+
+
+3. AUTHENTICATION, AUTHORIZATION & SECURITY
+--------------------------------------------------------------------------------
+- Authentication Methods:
+  1. Google OAuth 2.0 Sign-In via Firebase Authentication SDK (v12)
+  2. Custom Email/Password Authentication
+- Password Security: `bcrypt` (Salt rounds hashing & verification)
+- Session & Token Management: `jose` (Stateless JSON Web Tokens - JWT)
+- Cookie Security: HTTP-Only, Secure, SameSite Cookie Delivery
+- Authorization: Multi-tier Role-Based Access Control (RBAC):
+  * Super Admin (role_id: 1)
+  * Client / User (role_id: 2)
+  * Contractor (role_id: 3)
+  * Worker (role_id: 4)
+- Route Guard / Middleware: Custom Next.js Edge proxy/middleware for route-level access control
+
+
+4. THIRD-PARTY CLOUD SERVICES & APIS
+--------------------------------------------------------------------------------
+- Aiven Cloud:
+  * Managed Cloud MySQL database hosting
+  * SSL/TLS encrypted client connections (--require_secure_transport)
+- Google Gemini AI API:
+  * Model: `gemini-2.5-flash` (`@google/generative-ai` SDK)
+  * Feature: Real-time Construction AI Assistant (bilingual support: English, Bangla, Banglish)
+  * Cost estimation, construction guidelines, timeline calculation, and context-aware fallback
+- Google Firebase:
+  * Firebase Auth for secure one-click Google identity authentication
+- ImgBB Cloud API:
+  * REST API integration for multipart image uploading, CDN hosting, and media asset URLs
+
+
+5. APPLICATION MODULES & FEATURES
+--------------------------------------------------------------------------------
+- Admin Portal:
+  * Executive analytics dashboard (budget, revenue, progress, workforce utilization)
+  * Project management & status workflows (Pending, Ongoing, Completed)
+  * Role upgrade application review (Contractor/Worker approvals)
+  * Printable & exportable PDF/HTML administrative reporting system
+- Contractor Portal:
+  * Site workforce assignment & project worker tracking
+  * Material request processing & real-time inventory management
+  * Task creation, assignment, and completion tracking
+- Worker Portal:
+  * Daily site schedule and shift overview
+  * Direct material requisition requests with urgency tagging
+- Client / Public Portal:
+  * Interactive portfolio showcase with filtering by type & status
+  * Instant cost estimation request forms
+- Real-Time Communication System:
+  * Multi-participant in-app messaging/chat system between Clients, Contractors, Workers, and Admins
+- Intelligent AI Assistant:
+  * 24/7 interactive chat assistant powered by Google Gemini AI
+
+
+================================================================================
+READY-TO-USE CV / RESUME BULLET POINTS (COPY & PASTE READY)
+================================================================================
+
+[Option A: Full-Stack Developer Experience / Project Section]
+
+• Engineered a full-stack enterprise construction management platform using Next.js 16 (App Router), React 19, and Tailwind CSS v4, supporting 4 user roles (Admin, Contractor, Worker, Client).
+• Architected a robust relational database schema (12 tables) on Aiven Cloud MySQL with connection pooling and SSL/TLS encryption via `mysql2`.
+• Implemented dual authentication featuring Firebase Google OAuth 2.0 and custom credentials auth using bcrypt hashing and stateless HTTP-Only JWTs (`jose`).
+• Integrated Google Gemini 2.5 Flash AI API to deliver a real-time, multilingual construction consultation chatbot with intelligent fallback handling.
+• Built secure role-based access control (RBAC) middleware protecting sensitive administrative routes and APIs.
+• Integrated ImgBB Cloud API for automated image upload pipelines and CDN media hosting.
+• Developed dynamic modules for project tracking, task allocation, inventory management, PDF report generation, and multi-user chat.
+
+
+[Option B: Technical Skills Section for ATS Keywords]
+
+Frontend: Next.js 16, React 19, Tailwind CSS v4, JavaScript (ES6+), HTML5, CSS3, Swiper.js
+Backend: Node.js, Next.js Route Handlers (REST APIs), Connection Pooling, Middleware/RBAC
+Database: MySQL 8.4, Relational Schema Design, Aiven Cloud DBaaS, SSL/TLS
+Security: JWT (jose), Bcrypt, HTTP-Only Cookies, Firebase Google OAuth 2.0
+Cloud & AI APIs: Google Gemini 2.5 Flash, Firebase Authentication, ImgBB Cloud API
+Tools & DevOps: Git, GitHub, Linux/Bash, npm, ESLint
+================================================================================

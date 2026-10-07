@@ -71,7 +71,7 @@ export default function Register() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: user.email, name: user.displayName }),
+        body: JSON.stringify({ email: user.email, name: user.displayName, photoUrl: user.photoURL }),
       });
 
       const data = await res.json();

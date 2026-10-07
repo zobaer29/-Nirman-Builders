@@ -13,9 +13,9 @@ export async function GET(request) {
     // Total Revenue (sum of all project budgets)
     const [[{ totalBudget }]] = await pool.query('SELECT SUM(budget) as totalBudget FROM projects');
     // Average completion rate
-    const [[{ avgProgress }]] = await pool.query('SELECT AVG(progress) as avgProgress FROM projects WHERE status != "Pending"');
+    const [[{ avgProgress }]] = await pool.query("SELECT AVG(progress) as avgProgress FROM projects WHERE status != 'Pending'");
     // Active Resources
-    const [[{ activeWorkers }]] = await pool.query('SELECT COUNT(DISTINCT worker_id) as activeWorkers FROM project_workers WHERE status = "Active"');
+    const [[{ activeWorkers }]] = await pool.query("SELECT COUNT(DISTINCT worker_id) as activeWorkers FROM project_workers WHERE status = 'Active'");
 
     const formatCurrency = (val) => {
       if (!val) return '$0.00M';
@@ -47,7 +47,7 @@ export async function GET(request) {
 
     // 4. Budget Allocation
     // Mocked percentages of the total budget for ongoing projects
-    const [[{ ongoingBudget }]] = await pool.query('SELECT SUM(budget) as ongoingBudget FROM projects WHERE status = "Ongoing"');
+    const [[{ ongoingBudget }]] = await pool.query("SELECT SUM(budget) as ongoingBudget FROM projects WHERE status = 'Ongoing'");
     const baseBudget = ongoingBudget || 3500000;
     const budgetAllocation = {
       total: formatCurrency(baseBudget),

@@ -305,9 +305,9 @@ export default function Home() {
 
               <div className="space-y-6">
                 {[
-                  { icon: "📞", title: "Phone", info: "+880 1234 567890", detail: "Mon-Fri, 9am-6pm" },
-                  { icon: "✉️", title: "Email", info: "contact@nirmanbuilders.com", detail: "We'll respond within 24h" },
-                  { icon: "📍", title: "Location", info: "Level 4, Summit Tower, Banani, Dhaka 1213", detail: "Visit our office" }
+                  { icon: "📞", title: "Phone", info: "+8801993192365", detail: "Mon-Fri, 9am-6pm" },
+                  { icon: "✉️", title: "Email", info: "zobaerislamshanto@gmail.com", detail: "We'll respond within 24h" },
+                  { icon: "📍", title: "Location", info: "Vatara Natun Bazer Sayeednagor", detail: "Visit our office" }
                 ].map((item, index) => (
                   <div key={index} className="flex items-start gap-4 group">
                     <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
@@ -336,11 +336,10 @@ export default function Home() {
               <form className="space-y-5" onSubmit={handleContactSubmit}>
                 {contactStatus.message && (
                   <div
-                    className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
-                      contactStatus.type === "error"
-                        ? "border-rose-200 bg-rose-50 text-rose-700"
-                        : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    }`}
+                    className={`rounded-xl border px-4 py-3 text-sm font-semibold ${contactStatus.type === "error"
+                      ? "border-rose-200 bg-rose-50 text-rose-700"
+                      : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      }`}
                   >
                     {contactStatus.message}
                   </div>
@@ -376,7 +375,7 @@ export default function Home() {
                     type="tel"
                     value={contactForm.phone}
                     onChange={handleContactChange}
-                    placeholder="+880 1234 567890"
+                    placeholder="+8801993192365"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all placeholder:text-gray-300"
                   />
                 </div>

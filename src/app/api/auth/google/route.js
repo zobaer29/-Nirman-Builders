@@ -29,12 +29,12 @@ export async function POST(request) {
 
       const [result] = await pool.query(
         'INSERT INTO users (photoUrl, username, email, password_hash) VALUES (?, ?, ?, ?)',
-        [photoUrl, username, email, randomPassword]
+        [photoUrl || null, username, email, randomPassword]
       );
 
       user = {
         id: result.insertId,
-        photoUrl: photoUrl,
+        photoUrl: photoUrl || null,
         username: username,
         email: email,
         role_id: 2, // Default role

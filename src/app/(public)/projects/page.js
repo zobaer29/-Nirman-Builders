@@ -171,7 +171,15 @@ export default function Projects() {
               </div>
             </div>
 
-            {filteredProjects.length === 0 ? (
+            {projects.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <span className="text-5xl mb-4 block">🏗️</span>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">No Projects Added Yet</h3>
+                <p className="text-gray-500">
+                  Real projects added by the admin will appear here.
+                </p>
+              </div>
+            ) : filteredProjects.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <span className="text-5xl mb-4 block">🔍</span>
                 <h3 className="text-xl font-bold text-slate-800 mb-2">No Match Found</h3>
