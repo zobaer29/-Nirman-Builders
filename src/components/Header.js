@@ -6,7 +6,12 @@ import { usePathname } from 'next/navigation';
 export default function Header() {
   const [user, setUser] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,27 +69,30 @@ export default function Header() {
     { name: 'About', href: '/about' },
   ];
 
+  const isSolidHeader = scrolled || mobileMenuOpen;
+
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-white/80 backdrop-blur-lg shadow-sm py-3' 
+        isSolidHeader 
+          ? 'bg-white/95 backdrop-blur-lg shadow-sm py-3' 
           : 'bg-transparent py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2 group" onClick={() => setMobileMenuOpen(false)}>
           <div className="flex flex-col gap-0.5">
-            <div className={`w-6 h-1 transition-colors ${scrolled ? 'bg-emerald-600' : 'bg-emerald-500'}`}></div>
-            <div className={`w-6 h-3 transition-colors ${scrolled ? 'bg-slate-900' : 'bg-white'}`}></div>
+            <div className={`w-6 h-1 transition-colors ${isSolidHeader ? 'bg-emerald-600' : 'bg-emerald-500'}`}></div>
+            <div className={`w-6 h-3 transition-colors ${isSolidHeader ? 'bg-slate-900' : 'bg-white'}`}></div>
           </div>
           <span className={`text-xl font-black tracking-tighter transition-colors ${
-            scrolled ? 'text-slate-900' : 'text-white'
+            isSolidHeader ? 'text-slate-900' : 'text-white'
           }`}>
             NIRMAN<span className="text-emerald-500">.</span>
           </span>
         </Link>
 
+        {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6">
           <nav>
             <ul className="flex gap-8">
@@ -133,11 +141,105 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Toggle Placeholder */}
-        <button className="md:hidden text-emerald-500">
-          <span className="material-symbols-outlined text-3xl">menu</span>
+        {/* Mobile Toggle Button */}
+        <button 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className={`md:hidden p-2 rounded-2xl transition-all focus:outline-none ${
+            isSolidHeader 
+              ? 'text-slate-900 hover:bg-slate-100' 
+              : 'text-white hover:bg-white/10'
+          }`}
+          aria-label="Toggle mobile menu"
+          aria-expanded={mobileMenuOpen}
+        >
+          <span className="material-symbols-outlined text-3xl">
+            {mobileMenuOpen ? 'close' : 'menu'}
+          </span>
         </button>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden max-w-7xl mx-auto px-6 pt-3 pb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-white/95 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-slate-100 flex flex-col gap-6">
+            <nav>
+              <ul className="flex flex-col gap-1">
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center justify-between px-4 py-3 rounded-2xl text-base font-black transition-all ${
+                          isActive
+                            ? 'bg-emerald-50 text-emerald-600'
+                            : 'text-slate-700 hover:bg-slate-50 hover:text-emerald-500'
+                        }`}
+                      >
+                        <span>{link.name}</span>
+                        {isActive && (
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
+              {user ? (
+                <>
+                  <div className="px-4 py-3 flex items-center justify-between bg-slate-50 rounded-2xl">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Signed in</span>
+                      <span className="text-sm font-black text-slate-800 truncate max-w-[200px]">
+                        {user.username || user.email}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                      title="Logout"
+                    >
+                      <span className="material-symbols-outlined text-xl">logout</span>
+                    </button>
+                  </div>
+
+                  <Link
+                    href={getDashboardLink()}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-3.5 px-6 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                  >
+                    Go to Dashboard
+                  </Link>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-3.5 px-6 rounded-2xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-3 px-6 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all"
+                  >
+                    Create Account
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
